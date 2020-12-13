@@ -37,8 +37,7 @@ async function PPCalc(play, fc) {
     return new Promise((resolve, reject) => {
         fs.readFile('./cache/'+play.beatmapId+".osu", 'utf8', async function (err,data) {
             if (err) {
-                if (err.errno == -4058)  data = await GetBeatmapOsuFile(play.beatmapId, fc, play)
-                else return console.log(err)
+                data = await GetBeatmapOsuFile(play.beatmapId, fc, play)
             }
             if (fc) resolve(GetFcPP(data, play))
             else resolve(GetPlayPP(data, play))
