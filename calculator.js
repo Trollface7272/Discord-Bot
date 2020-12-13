@@ -25,8 +25,7 @@ async function StarWithMods(map, mods) {
     return new Promise((resolve, reject) => {
         fs.readFile('./cache/'+map+".osu", 'utf8', async function (err,data) {
             if (err) {
-                if (err.errno == -4058)  data = await GetBeatmapOsuFile(map, fc, play)
-                else return console.log(err)
+                data = await GetBeatmapOsuFile(map, fc, play)
             }
             var parser = new ojsama.parser().feed(data)
             resolve(new ojsama.diff().calc({map: parser.map, mods:mods}).total)
