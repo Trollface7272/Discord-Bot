@@ -5,11 +5,9 @@ const //Constants
     Client = new Discord.Client(),
     db = new Database(),
     PREFIX = "!",
-    FLAGS = {
-        osu: [""],
-        topPlays: ["g", "r", "o", "p"],
-        recent: ["m"]
-    },
+    FLAGS = [
+        "g", "r", "o", "p", "m"
+    ],
     Osu = new OsuFunctions(Client)
 
 var //Variables
@@ -37,6 +35,7 @@ Client.on("message", async msgData => {
     if (msgData.author.bot) return
     db.CheckIfNew(msgData.author.id, msgData.author.username)
     db.NewMessage(msgData.author.id, msgData.author.username)
+    if (!msgData.content.startsWith(PREFIX)) return
     let
     msg = msgData.content,                  //Message text
     lcMsg = msg.toLowerCase(),              //Message text in lower case
@@ -44,7 +43,7 @@ Client.on("message", async msgData => {
     command = splitMsg.shift(),             //First index of splited message is always the command
     names = [],                             //Used to store names
     flags = [],                             //Used to store flags
-    flag,                                   //Used to store flag value
+    flagValues = [],                                   //Used to store flag value
     lengthLimiter = 0,                      //Used to limit the names to 5
     gameMode = GetGamemode(command),        //Get selected gamemode
     foundMode = false,                      //Variable that is set to true when flag that required another input is found
@@ -52,25 +51,44 @@ Client.on("message", async msgData => {
     foundFlag = false,
     stopFix = false
 
-    if (!lcMsg.startsWith(PREFIX)) return
+    for (let i = 0; i < splitMsg.length; i++) {
+        const el = splitMsg[i]
+        limit-- 
+        if (FLAGS.indexOf(el) != -1) { //Is flag check
+            flags.push(el)  
+            limit++
+            if (el == "m") {
+                if (!isNaN(splitMsg[i+1]))  {
+                    gameMode = splitMsg[i+1]
+                    i++
+                } else return msgData.channel.send("**🔴 Please enter valid gamemode.**")
+            } else if (el == "g") {
+                if (!isNaN(splitMsg[i+1])) {
+                    flagValues[flags.length-1] = splitMsg[i+1]
+                    i++
+                }else return msgData.channel.send("**🔴 Please enter valid number after \`g\`.**")
+            }
+        }
+        else if (!isNaN(el)) {
+            flags.push("p")
+            flagValues[flags.length-1] = el
+        }
+        else if (limit < 1) {} //Can't really stop looping trough the array cause of flags so just do nothing
+        else if (el.length < 3 || el.match(/[^0-9 A-z_-]/)) msgData.channel.send("**🔴 Please enter valid user.**") //Minimal username lenght is 3 | Includes forbidden characters
+        else if (names.indexOf(el) != -1) {} // Username already in array
+        else names.push(el) //Is username -> add to names
+    }
+
+
+
+
+
     switch (command) {
         //Player profile
         case "mania":
         case "ctb":
         case "taiko":
         case "osu":
-            //Loop trough message for flags and usernames
-            splitMsg.forEach(el => {
-                lengthLimiter++ 
-                if (FLAGS.osu.indexOf(el) != -1) { //Is flag check
-                    flags.push(el)  
-                    lengthLimiter-- //Decrement the length limiter cause flags are not users
-                }
-                else if (lengthLimiter > limit) {} //Can't really stop looping trough the array cause of flags so just do nothing
-                else if (el.length < 3 || el.match(/[^0-9 A-z_-]/)) msgData.channel.send("**🔴 Please enter valid user.**") //Minimal username lenght is 3 | Includes forbidden characters
-                else if (names.indexOf(el) != -1) {} // Username already in array
-                else names.push(el) //Is username -> add to names
-            })
             if (names.length < 1) names.push(db.GetOsuName(msgData.author.id)) 
             if (names[0] == "Not Found") return msgData.channel.send("**🔴 Please specify user or set default one usin osuset command.**")
             //Loop trough names & get userdata
@@ -83,23 +101,6 @@ Client.on("message", async msgData => {
         case "r":
         case "rs":
         case "recent":
-            splitMsg.forEach(el => {
-                lengthLimiter++ 
-                if (FLAGS.osu.indexOf(el) != -1) { //Is flag check
-                    flags.push(el)  
-                    lengthLimiter-- //Decrement the length limiter cause flags are not users
-                    foundMode = true
-                }
-                else if (foundMode) {
-                    if (isNaN(el)) return message.channel.send("**🔴 Please enter valid gamemode.**")
-                    gameMode = el
-                    foundMode = false
-                }
-                else if (lengthLimiter > 5) {} //Can't really stop looping trough the array cause of flags so just do nothing
-                else if (el.length < 3 || el.match(/[^0-9 A-z_-]/)) msgData.channel.send("**🔴 Please enter valid user.**") //Minimal username lenght is 3 | Includes forbidden characters
-                else if (names.indexOf(el) != -1) {} // Username already in array
-                else names.push(el) //Is username -> add to names
-            })
             if (names.length < 1) names.push(db.GetOsuName(msgData.author.id))
             if (names[0] == "Not Found") return msgData.channel.send("**🔴 Please specify user or set default one usin osuset command.**")
 
@@ -114,39 +115,21 @@ Client.on("message", async msgData => {
         case "taikotop":
         case "maniatop":
         case "osutop":
-            splitMsg.forEach(el => {
-                if (FLAGS.topPlays.indexOf(el) != -1) {
-                    flags.push(el)
-                    if (el == "g") foundFlag = true
-                }
-                else if (foundFlag) {
-                    foundFlag = false
-                    if (isNaN(el))
-                        stopFix = true
-                    flag = el
-                }
-                else if (el.length <= 3 && !isNaN(el) && el <= 100) {
-                    flags.push("p")
-                    flag = el
-                }
-                else if (el.length < 3 ) msgData.channel.send("**🔴 Please enter valid user.**")
-                else if (el.match(/[^0-9 A-z_-]/)) msgData.channel.send("**🔴 Please enter valid user.**")
-                else names.push(el)
-            })
             if(stopFix || foundFlag) return msgData.channel.send("**🔴 Please enter a number after g tag**")
             let name = names[0] || db.GetOsuName(msgData.author.id), plays
-            if (name == "Not Found") return msgData.channel.send("**🔴 Please specify user or set default one usin osuset command.**")
+            if (name == "Not Found") return msgData.channel.send("**🔴 Please specify user or set default one using osuset command.**")
 
+            console.log(flagValues, flags);
             if (flags.length == 0) 
                 plays = await Osu.GetTopPlays(name, gameMode)
             else if (flags.indexOf("p") != -1)
-                plays = await Osu.GetSpecificPlay(name, flag, gameMode)
+                plays = await Osu.GetSpecificPlay(name, flagValues[flags.indexOf("p")], gameMode)
             else if (flags.indexOf("g") != -1 && flags.indexOf("r") != -1)
-                plays = await Osu.GetRecentTopPlaysGreaterThen(name, gameMode, true, flag)
+                plays = await Osu.GetRecentTopPlaysGreaterThen(name, gameMode, true, flagValues[flags.indexOf("g")])
             else if (flags.indexOf("g") != -1 && flags.indexOf("o") != -1)
-                plays = await Osu.GetRecentTopPlaysGreaterThen(name, gameMode, false, flag)
+                plays = await Osu.GetRecentTopPlaysGreaterThen(name, gameMode, false, flagValues[flags.indexOf("g")])
             else if (flags.indexOf("g") != -1) 
-                plays = await Osu.GetPlaysGreaterThen(name, gameMode, flag)
+                plays = await Osu.GetPlaysGreaterThen(name, gameMode, flagValues[flags.indexOf("g")])
             else if (flags.indexOf("o") != -1) 
                 plays = await Osu.GetRecentTopPlays(name, gameMode, false)
             else if (flags.indexOf("r") != -1) 
@@ -163,17 +146,6 @@ Client.on("message", async msgData => {
             let map = GetMapFromMessages(messages)
             if (map == "Not Found") return msgData.channel.send("**🔴 No maps found in conversation.**")
 
-            splitMsg.forEach(el => {
-                if (FLAGS.topPlays.indexOf(el) != -1) {
-                    flags.push(el)
-                }
-                else if (foundFlag) {
-                    foundFlag = false
-                }
-                else if (el.length < 3 ) msgData.channel.send("**🔴 Please enter valid user.**")
-                else if (el.match(/[^0-9 A-z_-]/)) msgData.channel.send("**🔴 Please enter valid user.**")
-                else names.push(el)
-            })
             let nam = names[0] || db.GetOsuName(msgData.author.id)
             if (nam == "Not Found") return msgData.channel.send("**🔴 Please specify user or set default one usin osuset command.**")
 

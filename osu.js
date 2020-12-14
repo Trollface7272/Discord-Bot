@@ -83,9 +83,6 @@ const
 
 class Osu {
     Client
-    /**
-     * @param {Discord.Client} client 
-     */
     constructor(client) {
         this.Client = client
     }
