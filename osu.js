@@ -401,6 +401,72 @@ class Osu {
         let author = [`Top ${play} ${ModNames[mode]} Play for ${profile.name}`, `https://osu.ppy.sh/users/${profile.id}/${ModLinkNames[mode]}`]
         return this.PlaysToEmbed([score], profile, author, mode)
     }
+    async GetRecentBest(user, mode) {
+        let profile, score
+        try {
+            profile = await OsuApi.getUser({u: user, m: mode})
+        } catch (error) {
+            if (error instanceof Error && error.message == "Not found") 
+                return `**🔴 ${user} not found.**`
+            else DEBUG.log("Error in GetRecentPlay - Recent", error.message, DEBUG.LEVELS.ERRORS)
+            return
+        }
+        try {
+            score = await OsuApi.getUserBest({u: user, m: mode, limit: 100})
+        } catch (error) {
+            if (error instanceof Error && error.message == "Not found") 
+                return `${profile.name} has no top plays.`
+            else DEBUG.log("Error in GetRecentPlay - Recent", error.message, DEBUG.LEVELS.ERRORS)
+            return
+        }
+        for (let i = 0; i < score.length; i++) {
+            score[i].index = i+1
+        }
+        score.sort(function(a, b) {
+            var dateA = new Date(a.date), dateB = new Date(b.date);
+            return dateB - dateA
+        })
+        score = score[0]
+
+        let author = [`Top ${score[0].index} ${ModNames[mode]} Play for ${profile.name}`, `https://osu.ppy.sh/users/${profile.id}/${ModLinkNames[mode]}`]
+        return this.PlaysToEmbed(score, profile, author, mode)
+    }
+    async GetRecentBestGreaterThen(user, mode, ammount) {
+        let profile, score
+        try {
+            profile = await OsuApi.getUser({u: user, m: mode})
+        } catch (error) {
+            if (error instanceof Error && error.message == "Not found") 
+                return `**🔴 ${user} not found.**`
+            else DEBUG.log("Error in GetRecentPlay - Recent", error.message, DEBUG.LEVELS.ERRORS)
+            return
+        }
+        try {
+            score = await OsuApi.getUserBest({u: user, m: mode, limit: 100})
+        } catch (error) {
+            if (error instanceof Error && error.message == "Not found") 
+                return `**🔴 ${profile.name} has no top plays.**`
+            else DEBUG.log("Error in GetRecentPlay - Recent", error.message, DEBUG.LEVELS.ERRORS)
+            return
+        }
+        for (let i = 0; i < score.length; i++) {
+            score[i].index = i+1
+        }
+        score.sort(function(a, b) {
+            var dateA = new Date(a.date), dateB = new Date(b.date);
+            return dateB - dateA
+        })
+        for (let i = 0; i < score.length; i++) {
+            if (score[i].pp > ammount) {
+                score = score[i]
+                break
+            }
+            if (i == score.length-1) return `**🔴 ${profile.name} has no plays above ${ammount}pp.**`   
+        }
+
+        let author = [`Top ${score[0].index} ${ModNames[mode]} Play for ${profile.name}`, `https://osu.ppy.sh/users/${profile.id}/${ModLinkNames[mode]}`]
+        return this.PlaysToEmbed(score, profile, author, mode)
+    }
 }
 
 function TwoDigitValue(num) {

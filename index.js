@@ -6,7 +6,7 @@ const //Constants
     db = new Database(),
     PREFIX = "!",
     FLAGS = [
-        "g", "r", "o", "p", "m"
+        "g", "r", "o", "p", "m", "b"
     ],
     Osu = new OsuFunctions(Client)
 
@@ -105,7 +105,10 @@ Client.on("message", async msgData => {
             if (names[0] == "Not Found") return msgData.channel.send("**🔴 Please specify user or set default one usin osuset command.**")
 
             names.forEach(async name => {
-                let recent = await Osu.GetRecentPlay(name, gameMode) //Get user data from osu api
+                let recent
+                if (flags.indexOf("b") && flags.indexOf("g")) recent = await Osu.GetRecentBestGreaterThen(name, gameMode, flagValues[flags.indexOf("g")])
+                else if (flags.indexOf("b")) recent = await Osu.GetRecentBest(name, gameMode)
+                else recent = await Osu.GetRecentPlay(name, gameMode) //Get user data from osu api
                 msgData.channel.send(recent) //Get embed from the date and send it
             }) 
             break
