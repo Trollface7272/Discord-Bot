@@ -106,8 +106,8 @@ Client.on("message", async msgData => {
 
             names.forEach(async name => {
                 let recent
-                if (flags.indexOf("b") && flags.indexOf("g")) recent = await Osu.GetRecentBestGreaterThen(name, gameMode, flagValues[flags.indexOf("g")])
-                else if (flags.indexOf("b")) recent = await Osu.GetRecentBest(name, gameMode)
+                if (flags.indexOf("b") != -1 && flags.indexOf("g") != -1) recent = await Osu.GetRecentBestGreaterThen(name, gameMode, flagValues[flags.indexOf("g")])
+                else if (flags.indexOf("b") != -1) recent = await Osu.GetRecentBest(name, gameMode)
                 else recent = await Osu.GetRecentPlay(name, gameMode) //Get user data from osu api
                 msgData.channel.send(recent) //Get embed from the date and send it
             }) 
@@ -192,7 +192,7 @@ function GetMapFromMessages(messages) {
             if (msg.embeds[0].author && msg.embeds[0].author.url && msg.embeds[0].author.url.startsWith("https://osu.ppy.sh/b/")) {
                 x = RetardedFix(x, msg.embeds[0].author && msg.embeds[0].author.url.split("https://osu.ppy.sh/b/")[1])
                 return x
-            } else if (msg.embeds[0].description.includes("https://osu.ppy.sh/b/")) {
+            } else if (msg.embeds[0].description && msg.embeds[0].description.includes("https://osu.ppy.sh/b/")) {
                 x = RetardedFix(x, msg.embeds[0].description.split("https://osu.ppy.sh/b/", 2)[1].split(")")[0])
                 return x
             }

@@ -286,14 +286,12 @@ class Osu {
             let map = (await OsuApi.getBeatmaps({b: play.beatmapId, a: 1, mods: RemoveNonDiffMods(play.raw_mods), a:1, m: mode}))[0]
             let fcppDisplay = ""
             if (play.maxCombo < map.maxCombo - 15 || play.counts.miss > 0) fcppDisplay = `(${TwoDigitValue(await Calculator.GetFcPP(play))}pp for ${TwoDigitValue(Calculator.GetFcAcc(play) * 100)}% FC) `
-
             
             description += `**${play.index}. [${map.title} [${map.version}]](https://osu.ppy.sh/b/${map.id}) +${GetModsFromRaw(play.raw_mods)}** [${TwoDigitValue(map.difficulty.rating)}★]\n`
             description += `▸ ${this.Client.emojis.resolve(getRankingEmote(play.rank))} ▸ **${TwoDigitValue(play.pp)}pp** ${fcppDisplay}▸ ${TwoDigitValue(CalculateAcc(play.counts)*100)}%\n`
             description += `▸ ${play.score} ▸ x${play.maxCombo}/${map.maxCombo} ▸ [${play.counts[300]}/${play.counts[100]}/${play.counts[50]}/${play.counts.miss}]\n`
             description += `▸ Score Set ${DateDiff(new moment(play.date), new moment(Date.now()))} Ago\n`
         }
-
         return new
             Discord.MessageEmbed()
             .setAuthor(author[0], `https://www.countryflags.io/${profile.country.toLowerCase()}/flat/64.png`, author[1])
@@ -428,8 +426,8 @@ class Osu {
         })
         score = score[0]
 
-        let author = [`Top ${score[0].index} ${ModNames[mode]} Play for ${profile.name}`, `https://osu.ppy.sh/users/${profile.id}/${ModLinkNames[mode]}`]
-        return this.PlaysToEmbed(score, profile, author, mode)
+        let author = [`Top ${score.index} ${ModNames[mode]} Play for ${profile.name}`, `https://osu.ppy.sh/users/${profile.id}/${ModLinkNames[mode]}`]
+        return await this.PlaysToEmbed([score], profile, author, mode)
     }
     async GetRecentBestGreaterThen(user, mode, ammount) {
         let profile, score
@@ -464,8 +462,8 @@ class Osu {
             if (i == score.length-1) return `**🔴 ${profile.name} has no plays above ${ammount}pp.**`   
         }
 
-        let author = [`Top ${score[0].index} ${ModNames[mode]} Play for ${profile.name}`, `https://osu.ppy.sh/users/${profile.id}/${ModLinkNames[mode]}`]
-        return this.PlaysToEmbed(score, profile, author, mode)
+        let author = [`Top ${score.index} ${ModNames[mode]} Play for ${profile.name}`, `https://osu.ppy.sh/users/${profile.id}/${ModLinkNames[mode]}`]
+        return this.PlaysToEmbed([score], profile, author, mode)
     }
 }
 
