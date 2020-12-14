@@ -25,7 +25,7 @@ async function StarWithMods(map, mods) {
     return new Promise((resolve, reject) => {
         fs.readFile('./cache/'+map+".osu", 'utf8', async function (err,data) {
             if (err) {
-                data = await GetBeatmapOsuFile(map, fc, play)
+                data = await GetBeatmapOsuFile(map)
             }
             var parser = new ojsama.parser().feed(data)
             resolve(new ojsama.diff().calc({map: parser.map, mods:mods}).total)
@@ -37,14 +37,14 @@ async function PPCalc(play, fc) {
     return new Promise((resolve, reject) => {
         fs.readFile('./cache/'+play.beatmapId+".osu", 'utf8', async function (err,data) {
             if (err) {
-                data = await GetBeatmapOsuFile(play.beatmapId, fc, play)
+                data = await GetBeatmapOsuFile(play.beatmapId)
             }
             if (fc) resolve(GetFcPP(data, play))
             else resolve(GetPlayPP(data, play))
         })
     })
 }
-async function GetBeatmapOsuFile(id, fc, play) {
+async function GetBeatmapOsuFile(id) {
     return new Promise((resolve, reject) => {
         request("http://osu.ppy.sh/osu/"+id, function(err, res, body) {
             fs.writeFile("./cache/"+id+".osu", body, () => {})
