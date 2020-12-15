@@ -465,19 +465,18 @@ class Osu {
         let author = [`Top ${score.index} ${ModNames[mode]} Play for ${profile.name}`, `https://osu.ppy.sh/users/${profile.id}/${ModLinkNames[mode]}`]
         return this.PlaysToEmbed([score], profile, author, mode)
     }
-    async GetMap(map, mode, mods) {
+    async GetMap(map, mode, mods, custom) {
         if (isNaN(mods) && mods) mods = Calculator.ParseMods(mods)
         else if (!mods) mods = 0
         let beatmap = (await OsuApi.getBeatmaps({b: map, m:mode, mods: RemoveNonDiffMods(mods)}))[0]
         if (mods & BitMods.Easy || mods & BitMods.HardRock || mods & BitMods.DoubleTime || mods & BitMods.HalfTime) beatmap.difficulty = Calculator.GetDifficultyValues(beatmap.difficulty, mods)
         
-        console.log(beatmap.difficulty)
         let description  = `**Length:** ${Math.floor(beatmap["length"].drain / 60)}:${beatmap["length"].drain % 60} `
             description += `**BPM:** ${beatmap.bpm} `
             description += `**Mods:** ${GetModsFromRaw(mods)}\n`
             description += `**Download:** [map](https://osu.ppy.sh/d/${beatmap.beatmapSetId})([no vid](https://osu.ppy.sh/d/${beatmap.beatmapSetId}n)) [osu!direct](osu://b/${beatmap.beatmapSetId})\n`
             description += `**${beatmap.version}**\n` /*TODO: Add diff emoji*/
-            description += `▸**Difficulty:** ${TwoDigitValue(beatmap.difficulty.rating)}`
+            description += `▸**Difficulty:** ${TwoDigitValue(beatmap.difficulty.rating)}★`
             description += `▸**Max Combo:** x${beatmap.maxCombo}\n`
             description += `▸**AR:** ${Math.round(beatmap.difficulty.approach * 100) / 100}`
             description += `▸**OD:** ${Math.round(beatmap.difficulty.overall * 100) / 100}`
@@ -485,7 +484,8 @@ class Osu {
             description += `▸**CS:** ${Math.round(beatmap.difficulty.size * 100)  / 100}\n`
             description += `▸**PP:** `
             description += `○ **95%-**${TwoDigitValue(await Calculator.GetSpecificAccPP(beatmap, 95, mods))}`
-            description += `○ **99%-**${TwoDigitValue(await Calculator.GetSpecificAccPP(beatmap, 99, mods))}`
+            if (custom) description += `○ **${Math.round(custom*100)/100}%-**${TwoDigitValue(await Calculator.GetSpecificAccPP(beatmap, custom, mods))}`
+            else description += `○ **99%-**${TwoDigitValue(await Calculator.GetSpecificAccPP(beatmap, 99, mods))}`
             description += `○ **100%-**${TwoDigitValue(await Calculator.GetSpecificAccPP(beatmap, 100, mods))}`
 
         return new
@@ -493,7 +493,7 @@ class Osu {
             .setAuthor(`${beatmap.artist} - ${beatmap.title} by ${beatmap.creator}`, ``, `https://osu.ppy.sh/b/${beatmap.id}`)
             .setThumbnail(`https://assets.ppy.sh/beatmaps/${beatmap.beatmapSetId}/covers/cover.jpg`)
             .setDescription(description)
-            .setFooter(`${beatmap.approvalStatus} | ${beatmap.counts.favourites} | Approved ${beatmap.raw_approvedDate}`)
+            .setFooter(`${beatmap.approvalStatus} | ${beatmap.counts.favourites} ❤︎ | Approved ${beatmap.raw_approvedDate}`)
     }
 }
 
@@ -736,9 +736,7 @@ class osu {
      */
     async getBeatmap(map, mods, mode) {
         if(!mode) mode = 0
-        console.log(RemoveNonDiffMods(mods))
         var map = (await this.osuApi.getBeatmaps({b: map, mods: RemoveNonDiffMods(mods), m: mode}))[0]
-        console.log(map.difficulty)
         return {
             id: map.id,
             setId: map.beatmapSetId,

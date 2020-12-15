@@ -69,13 +69,17 @@ Client.on("message", async msgData => {
                 }else return msgData.channel.send("**🔴 Please enter valid number after \`g\`.**")
             }
         }
-        else if (!isNaN(el)) {
+        else if (!isNaN(el) && !el.includes(".")) {
             flags.push("p")
             flagValues[flags.length-1] = el
         }
         else if (el.startsWith("+")) {
             flags.push("mods")
             flagValues[flags.length-1] = el.substr(1)
+        }
+        else if (el.includes(".") && !isNaN(el)) {
+            flags.push("acc")
+            flagValues[flags.length-1] = el
         }
         else if (limit < 1) {} //Can't really stop looping trough the array cause of flags so just do nothing
         else if (el.length < 3 || el.match(/[^0-9 A-z_-]/)) msgData.channel.send("**🔴 Please enter valid user.**") //Minimal username lenght is 3 | Includes forbidden characters
@@ -165,7 +169,7 @@ Client.on("message", async msgData => {
             map = GetMapFromMessages(messages)
             let mods = flags.indexOf("mods") != -1 ? flagValues[flags.indexOf("mods")] : 0
             if (map == "Not Found") return msgData.channel.send("**🔴 No maps found in conversation.**")
-            msgData.channel.send(await Osu.GetMap(map, gameMode, mods))
+            msgData.channel.send(await Osu.GetMap(map, gameMode, mods, flags.indexOf("acc") != -1 ? flagValues[flags.indexOf("acc")] : undefined))
             break
 
         case "osuset":
