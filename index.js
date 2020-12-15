@@ -33,20 +33,20 @@ Client.on('ready', async () => {
 
 Client.on("message", async msgData => {
     if (msgData.author.bot) return
+
     db.CheckIfNew(msgData.author.id, msgData.author.username)
     db.NewMessage(msgData.author.id, msgData.author.username)
+
     if (!msgData.content.startsWith(PREFIX)) return
-    let
+    let messages, map, 
     msg = msgData.content,                  //Message text
     lcMsg = msg.toLowerCase(),              //Message text in lower case
     splitMsg = lcMsg.substr(1).split(" "),  //Message splited by spaces without prefix
     command = splitMsg.shift(),             //First index of splited message is always the command
     names = [],                             //Used to store names
     flags = [],                             //Used to store flags
-    flagValues = [],                                   //Used to store flag value
-    lengthLimiter = 0,                      //Used to limit the names to 5
+    flagValues = [],                        //Used to store flag value
     gameMode = GetGamemode(command),        //Get selected gamemode
-    foundMode = false,                      //Variable that is set to true when flag that required another input is found
     limit = 5,                              //Limit how many plays to get
     foundFlag = false,
     stopFix = false
@@ -72,6 +72,10 @@ Client.on("message", async msgData => {
         else if (!isNaN(el)) {
             flags.push("p")
             flagValues[flags.length-1] = el
+        }
+        else if (el.startsWith("+")) {
+            flags.push("mods")
+            flagValues[flags.length-1] = el.substr(1)
         }
         else if (limit < 1) {} //Can't really stop looping trough the array cause of flags so just do nothing
         else if (el.length < 3 || el.match(/[^0-9 A-z_-]/)) msgData.channel.send("**🔴 Please enter valid user.**") //Minimal username lenght is 3 | Includes forbidden characters
@@ -145,14 +149,23 @@ Client.on("message", async msgData => {
         
         case "c":
         case "compare":
-            let messages = await msgData.channel.messages.fetch({limit: 50})
-            let map = GetMapFromMessages(messages)
+            messages = await msgData.channel.messages.fetch({limit: 50})
+            map = GetMapFromMessages(messages)
             if (map == "Not Found") return msgData.channel.send("**🔴 No maps found in conversation.**")
 
             let nam = names[0] || db.GetOsuName(msgData.author.id)
             if (nam == "Not Found") return msgData.channel.send("**🔴 Please specify user or set default one usin osuset command.**")
 
             msgData.channel.send(await Osu.GetUserBestOnMap(nam, map, gameMode))
+            break
+
+        case "m":
+        case "map":
+            messages = await msgData.channel.messages.fetch({limit: 50})
+            map = GetMapFromMessages(messages)
+            let mods = flags.indexOf("mods") != -1 ? flagValues[flags.indexOf("mods")] : 0
+            if (map == "Not Found") return msgData.channel.send("**🔴 No maps found in conversation.**")
+            msgData.channel.send(await Osu.GetMap(map, gameMode, mods))
             break
 
         case "osuset":
@@ -201,8 +214,7 @@ function GetMapFromMessages(messages) {
     return x || "Not Found"
 }
 function RetardedFix(x,y) {
-    if (x) return x
-    else return y
+    return x || y
 }
 [`exit`, `SIGINT`, `SIGUSR1`, `SIGUSR2`, `uncaughtException`, `SIGTERM`].forEach(eventType => {
     process.on(eventType, exitHandler.bind(null, eventType));
