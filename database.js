@@ -5,7 +5,7 @@ var loaded = false
 class Database {
     constructor() {
         SelectData()
-        setInterval(UpdataData, 60000)
+        setInterval(UpdataData, 600000)
     }
     CheckIfNew(discordId, discordName) {
         if (loaded)
