@@ -527,7 +527,7 @@ class Osu {
             if (recentList[i].beatmapId == recent.beatmapId) tries++
             else break
         }
-        if (recent.mods != 0) beatmap.difficulty = await Calculator.GetDifficultyValues(beatmap.difficulty, mods)
+        if (recent.mods != 0) beatmap.difficulty = await Calculator.GetDifficultyValues(beatmap.difficulty, recent.mods)
         
         return new
             Discord.MessageEmbed()
