@@ -1,13 +1,17 @@
 const 
       sql = require("mssql")
       let data = []
+var loaded = false
 class Database {
     constructor() {
         SelectData()
         setInterval(UpdataData, 60000)
     }
     CheckIfNew(discordId, discordName) {
-        if (!data[discordId]) InsertData(discordId, discordName)
+        if (loaded)
+            if (!data[discordId]) InsertData(discordId, discordName)
+        else 
+            setTimeout(()=>{this.CheckIfNew(discordId, discordName)}, 5000)
     }
     async UpdateNow() {
         await UpdataData()
@@ -55,6 +59,7 @@ async function SelectData() {
         el.changed = false
         data[el.discord_id] = el
     })
+    loaded = true
 }
 async function SetOsuUsername(discordId, username) {
     await Connect()
