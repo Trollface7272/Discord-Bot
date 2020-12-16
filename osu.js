@@ -533,17 +533,26 @@ class Osu {
             Discord.MessageEmbed()
             .setAuthor(`Most Recent Play by ${profile.name}`, `http://s.ppy.sh/a/${profile.id}`, `https://osu.ppy.sh/users/${profile.id}/${ModLinkNames[mode]}`)
             .addFields(
-                {name: "Beatmap", value: `${beatmap.title} - ${beatmap.version}\nBy ${beatmap.creator}`, inline: true},
-                {name: "Difficulty", value: `AR: ${TwoDigitValue(beatmap.difficulty.approach)}\nOD: ${TwoDigitValue(beatmap.difficulty.overall)}\n CS: ${TwoDigitValue(beatmap.difficulty.size)}\n HP: ${TwoDigitValue(beatmap.difficulty.drain)}\nSpeed: ${TwoDigitValue(beatmap.difficulty.speed)}\nAim: ${TwoDigitValue(beatmap.difficulty.aim)}`, inline: true},
-                {name: "Info", value: `BPM: ${beatmap.bpm}\nLength: ${parseInt(beatmap.length.total / 60)}:${beatmap.length.total % 60}${beatmap.length.total == beatmap.length.drain ? "" : "(" + parseInt(beatmap.length.drain / 60) + ":" + beatmap.length.drain % 60 + ")"}
-Mods: ${GetModsFromRaw(recent.raw_mods)}\nFavourites: ${beatmap.counts.favourites}\nPasses: ${beatmap.counts.passes}/${beatmap.counts.plays}\nRating: ${rating}`},
-                {name: "Downloads", value: `[Official](https://osu.ppy.sh/d/${beatmap.beatmapSetId})\n[Official No Video](https://osu.ppy.sh/d/${beatmap.beatmapSetId}n)\n[osu!dirrect](osu://b/${beatmap.beatmapSetId})\n[Bloodcat]()` + recent.hasReplay ? `https://osu.ppy.sh/replay/` : "", inline: true},
-                {name: "Max Performance", value: await GetAccPPs([`100`, `99`, `95`], beatmap, recent.raw_mods), inline: false},
+                {name: "Beatmap", value: `[${beatmap.title}](https://osu.ppy.sh/b/${beatmap.id})\n [${beatmap.version}](https://osu.ppy.sh/b/${beatmap.id}) \n By [${beatmap.creator}](https://osu.ppy.sh/u/${beatmap.creator})`, inline: true},
+                {name: "Downloads", value: `[Official](https://osu.ppy.sh/b/${beatmap.beatmapSetId})\n [Official No Video](https://osu.ppy.sh/d/${beatmap.beatmapSetId}n)\n osu://b/${beatmap.beatmapSetId}\n [Bloodcat](https://bloodcat.com/osu/s/${beatmap.beatmapSetId})`, inline: true},
+                {name: '\u200B', value: '\u200B', inline: true},
+
+                {name: "Difficulty", value: `AR: ${DiffRounder(beatmap.difficulty.approach)}\nOD: ${DiffRounder(beatmap.difficulty.overall)}\n CS: ${DiffRounder(beatmap.difficulty.size)}\n HP: ${DiffRounder(beatmap.difficulty.drain)}\nSpeed: ${TwoDigitValue(beatmap.difficulty.speed)}\nAim: ${TwoDigitValue(beatmap.difficulty.aim)}`, inline: true},
+                {name: "Info", value: `BPM: ${beatmap.bpm}\nLength: ${parseInt(beatmap.length.total / 60)}:${beatmap.length.total % 60}${beatmap.length.total == beatmap.length.drain ? "" : "(" + parseInt(beatmap.length.drain / 60) + ":" + beatmap.length.drain % 60 + ")"}\nMods: ${GetModsFromRaw(recent.raw_mods)}\nFavourites: ${beatmap.counts.favourites}\nPasses: ${beatmap.counts.passes}/${beatmap.counts.plays}\nRating: ${rating}`, inline: true},
+                {name: '\u200B', value: '\u200B', inline: true},
+
+                {name: "Max Performance", value: await GetAccPPs([`100`, `99`, `95`], beatmap, recent.raw_mods), inline: true},
                 {name: "Play Performance", value: `${TwoDigitValue(CalculateAcc(recent.counts) * 100)}% - ${TwoDigitValue(await Calculator.GetPlayPP(recent))}pp\n${TwoDigitValue(Calculator.GetFcAcc(recent) * 100)}% - ${TwoDigitValue(await Calculator.GetFcPP(recent))}pp for FC`, inline: true},
-                {name: "Counts", value: `${recent.counts[300]}/${recent.counts[100]}/${recent.counts[50]}/${recent.counts.miss}\n${recent.maxCombo}x/${beatmap.maxCombo}x`}
+                {name: '\u200B', value: '\u200B', inline: true},
+                
+                {name: "Counts", value: `${recent.counts[300]}/${recent.counts[100]}/${recent.counts[50]}/${recent.counts.miss}\n${recent.maxCombo}x/${beatmap.maxCombo}x`, inline:true}
             )
-            .setFooter(`${beatmap.approvalStatus} | ${beatmap._approvedDate}`)
+            .setFooter(`${beatmap.approvalStatus} | ${beatmap.raw_approvedDate}`)
     }
+}
+
+function DiffRounder(num) {
+    return (Math.round(num*100)/100)
 }
 
 function TwoDigitValue(num) {
