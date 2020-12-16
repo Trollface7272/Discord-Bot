@@ -495,12 +495,71 @@ class Osu {
             .setDescription(description)
             .setFooter(`${beatmap.approvalStatus} | ${beatmap.counts.favourites} ❤︎ | Approved ${beatmap.raw_approvedDate}`)
     }
+    async GetRecentDetailed(user, mode) {
+        if(!mode) mode = 0
+        let profile, recentList, beatmap,
+            tries = 0
+        try {
+            profile = await OsuApi.getUser({u: user, m: mode})
+        } catch (error) {
+            if (error instanceof Error && error.message == "Not found") {
+                return `**🔴 ${user} not found.**`
+            }
+            else DEBUG.log("Error in GetRecentPlay - Profile", error.message, DEBUG.LEVELS.ERRORS)
+            return
+        }
+        try {
+            recentList = await OsuApi.getUserRecent({u: user, m: mode, limit: 50})
+        } catch (error) {
+            if (error instanceof Error && error.message == "Not found") {
+                return `**🔴 ${profile.name} has no recent plays.**`
+            }
+            else DEBUG.log("Error in GetRecentPlay - Recent", error.message, DEBUG.LEVELS.ERRORS)
+            return
+        }
+        let recent = recentList[0]
+        beatmap = (await OsuApi.getBeatmaps({b: recent.beatmapId, mods: RemoveNonDiffMods(recent.raw_mods)}))[0]
+        let rating = ""
+        for (let i = 0; i < parseInt(beatmap.rating); i++) {
+            rating += "⭐"
+        }
+        for (let i = 0; i < recentList.length; i++) {
+            if (recentList[i].beatmapId == recent.beatmapId) tries++
+            else break
+        }
+        if (recent.mods != 0) beatmap.difficulty = await Calculator.GetDifficultyValues(beatmap.difficulty, mods)
+        
+        return new
+            Discord.MessageEmbed()
+            .setAuthor(`Most Recent Play by ${profile.name}`, `http://s.ppy.sh/a/${profile.id}`, `https://osu.ppy.sh/users/${profile.id}/${ModLinkNames[mode]}`)
+            .addFields(
+                {name: "Beatmap", value: `${beatmap.title} - ${beatmap.version}\nBy ${beatmap.creator}`, inline: true},
+                {name: "Difficulty", value: `AR: ${TwoDigitValue(beatmap.difficulty.approach)}\nOD: ${TwoDigitValue(beatmap.difficulty.overall)}\n CS: ${TwoDigitValue(beatmap.difficulty.size)}\n HP: ${TwoDigitValue(beatmap.difficulty.drain)}\nSpeed: ${TwoDigitValue(beatmap.difficulty.speed)}\nAim: ${TwoDigitValue(beatmap.difficulty.aim)}`, inline: true},
+                {name: "Info", value: `BPM: ${beatmap.bpm}\nLength: ${parseInt(beatmap.length.total / 60)}:${beatmap.length.total % 60}${beatmap.length.total == beatmap.length.drain ? "" : "(" + parseInt(beatmap.length.drain / 60) + ":" + beatmap.length.drain % 60 + ")"}
+Mods: ${GetModsFromRaw(recent.raw_mods)}\nFavourites: ${beatmap.counts.favourites}\nPasses: ${beatmap.counts.passes}/${beatmap.counts.plays}\nRating: ${rating}`},
+                {name: "Downloads", value: `[Official](https://osu.ppy.sh/d/${beatmap.beatmapSetId})\n[Official No Video](https://osu.ppy.sh/d/${beatmap.beatmapSetId}n)\n[osu!dirrect](osu://b/${beatmap.beatmapSetId})\n[Bloodcat]()` + recent.hasReplay ? `https://osu.ppy.sh/replay/` : "", inline: true},
+                {name: "Max Performance", value: await GetAccPPs([`100`, `99`, `95`], beatmap, recent.raw_mods), inline: false},
+                {name: "Play Performance", value: `${TwoDigitValue(CalculateAcc(recent.counts) * 100)}% - ${TwoDigitValue(await Calculator.GetPlayPP(recent))}pp\n${TwoDigitValue(Calculator.GetFcAcc(recent) * 100)}% - ${TwoDigitValue(await Calculator.GetFcPP(recent))}pp for FC`, inline: true},
+                {name: "Counts", value: `${recent.counts[300]}/${recent.counts[100]}/${recent.counts[50]}/${recent.counts.miss}\n${recent.maxCombo}x/${beatmap.maxCombo}x`}
+            )
+            .setFooter(`${beatmap.approvalStatus} | ${beatmap._approvedDate}`)
+    }
 }
 
 function TwoDigitValue(num) {
     return (Math.round(num*100)/100).toFixed(2)
 }
 
+function GetAccPPs(accs, beatmap, mods) {
+    return new Promise(async (resolve, reject) => {
+        let performance = ""
+        for (let i = 0; i < accs.length; i++) {
+            let el = accs[i]
+            performance += `${el}% - ${TwoDigitValue(await Calculator.GetSpecificAccPP(beatmap, el, mods))}pp\n`
+            if (i == accs.length - 1) resolve(performance)
+        }
+    })
+}
 
 function GetModsFromRaw(rawMods) {
     if(rawMods == 0) return "No Mod"

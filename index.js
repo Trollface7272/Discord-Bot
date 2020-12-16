@@ -6,7 +6,7 @@ const //Constants
     db = new Database(),
     PREFIX = "!",
     FLAGS = [
-        "g", "r", "o", "p", "m", "b"
+        "g", "r", "o", "p", "m", "b", "d"
     ],
     Osu = new OsuFunctions(Client)
 
@@ -116,6 +116,7 @@ Client.on("message", async msgData => {
                 let recent
                 if (flags.indexOf("b") != -1 && flags.indexOf("g") != -1) recent = await Osu.GetRecentBestGreaterThen(name, gameMode, flagValues[flags.indexOf("g")])
                 else if (flags.indexOf("b") != -1) recent = await Osu.GetRecentBest(name, gameMode)
+                else if (flags.indexOf("d") != -1) recent = await Osu.GetRecentDetailed(name, gameMode)
                 else recent = await Osu.GetRecentPlay(name, gameMode) //Get user data from osu api
                 msgData.channel.send(recent) //Get embed from the date and send it
             }) 
@@ -130,7 +131,6 @@ Client.on("message", async msgData => {
             let name = names[0] || db.GetOsuName(msgData.author.id), plays
             if (name == "Not Found") return msgData.channel.send("**🔴 Please specify user or set default one using osuset command.**")
 
-            console.log(flagValues, flags);
             if (flags.length == 0) 
                 plays = await Osu.GetTopPlays(name, gameMode)
             else if (flags.indexOf("p") != -1)
@@ -225,8 +225,8 @@ function RetardedFix(x,y) {
 })
 async function exitHandler(options, exitCode) {
     await db.UpdateNow()
-    if (exitCode || exitCode === 0) console.log(exitCode);
-    process.exit();
+    if (exitCode || exitCode === 0) console.log(exitCode)
+    process.exit()
 }
 
 Client.login(process.env.token ||'NTg0MzIxMzY2MzA4ODE0ODQ4.XPJNrQ._bPg104X-oY2l4mQ0ET9CwpuIzI')
