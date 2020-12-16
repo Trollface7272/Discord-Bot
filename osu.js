@@ -533,12 +533,12 @@ class Osu {
             Discord.MessageEmbed()
             .setAuthor(`Most Recent Play by ${profile.name}`, `http://s.ppy.sh/a/${profile.id}`, `https://osu.ppy.sh/users/${profile.id}/${ModLinkNames[mode]}`)
             .addFields(
-                {name: "Beatmap", value: `[${beatmap.title}](https://osu.ppy.sh/b/${beatmap.id})\n [${beatmap.version}](https://osu.ppy.sh/b/${beatmap.id}) \n By [${beatmap.creator}](https://osu.ppy.sh/u/${beatmap.creator})`, inline: true},
+                {name: "Beatmap", value: `[${beatmap.title}](https://osu.ppy.sh/b/${beatmap.id})\n [${beatmap.version}](https://osu.ppy.sh/b/${beatmap.id}) \n By [${beatmap.creator}](https://osu.ppy.sh/u/${beatmap.creator})\nWith ${GetModsFromRaw(recent.raw_mods)}`, inline: true},
                 {name: "Downloads", value: `[Official](https://osu.ppy.sh/b/${beatmap.beatmapSetId})\n [Official No Video](https://osu.ppy.sh/d/${beatmap.beatmapSetId}n)\n osu://b/${beatmap.beatmapSetId}\n [Bloodcat](https://bloodcat.com/osu/s/${beatmap.beatmapSetId})`, inline: true},
                 {name: '\u200B', value: '\u200B', inline: true},
 
                 {name: "Difficulty", value: `AR: ${DiffRounder(beatmap.difficulty.approach)}\nOD: ${DiffRounder(beatmap.difficulty.overall)}\n CS: ${DiffRounder(beatmap.difficulty.size)}\n HP: ${DiffRounder(beatmap.difficulty.drain)}\nSpeed: ${TwoDigitValue(beatmap.difficulty.speed)}\nAim: ${TwoDigitValue(beatmap.difficulty.aim)}`, inline: true},
-                {name: "Info", value: `BPM: ${beatmap.bpm}\nLength: ${parseInt(beatmap.length.total / 60)}:${beatmap.length.total % 60}${beatmap.length.total == beatmap.length.drain ? "" : "(" + parseInt(beatmap.length.drain / 60) + ":" + beatmap.length.drain % 60 + ")"}\nMods: ${GetModsFromRaw(recent.raw_mods)}\nFavourites: ${beatmap.counts.favourites}\nPasses: ${beatmap.counts.passes}/${beatmap.counts.plays}\nRating: ${rating}`, inline: true},
+                {name: "Info", value: `BPM: ${beatmap.bpm}\nLength: ${parseInt(beatmap.length.total / 60)}:${beatmap.length.total % 60}${beatmap.length.total == beatmap.length.drain ? "" : "(" + parseInt(beatmap.length.drain / 60) + ":" + beatmap.length.drain % 60 + ")"}\nFavourites: ${beatmap.counts.favourites}\nPasses: ${beatmap.counts.passes}/${beatmap.counts.plays}\nRating: ${rating}`, inline: true},
                 {name: '\u200B', value: '\u200B', inline: true},
 
                 {name: "Max Performance", value: await GetAccPPs([`100`, `99`, `95`], beatmap, recent.raw_mods), inline: true},
