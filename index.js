@@ -58,7 +58,8 @@ Client.on("message", async msgData => {
             if (el === "m") if (!isNaN(parseInt(splitMsg[i + 1]))) {
                 gameMode = splitMsg[i + 1]
                 i++
-            } else return msgData.channel.send("**🔴 Please enter valid gamemode.**") else if (el === "g") {
+            } else return msgData.channel.send("**🔴 Please enter valid gamemode.**")
+            else if (el === "g") {
                 if (!isNaN(parseInt(splitMsg[i + 1]))) {
                     flagValues[flags.length - 1] = splitMsg[i + 1]
                     i++

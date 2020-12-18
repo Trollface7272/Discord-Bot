@@ -8,8 +8,8 @@ let data = {
 let loaded = false;
 
 class Database {
-    async constructor() {
-        await SelectData()
+    constructor() {
+        SelectData()
         setInterval(UpdateData, 600000)
     }
 
@@ -115,16 +115,16 @@ async function SelectData() {
         el.changed = false
         data.users[el["discord_id"]] = el
     })
-    result = await sql.query`SELECT *
-                             FROM servers;`
+    result = (await sql.query`SELECT *
+                             FROM servers;`).recordset
     result.forEach(el => {
         el.changed = false
         data.servers[el["discord_id"]] = el
     })
-    result = await sql.query`SELECT *
+    result = (await sql.query`SELECT *
                              FROM tracking
                                       JOIN tracked_users ON tracking.id_tu = tracked_users.id_tu
-                                      JOIN servers ON tracking.id_ser = servers.id_ser;`
+                                      JOIN servers ON tracking.id_ser = servers.id_ser;`).recordset
     result.forEach(el => {
         el.changed = false
         data.tracked[el["id_trc"]] = el
