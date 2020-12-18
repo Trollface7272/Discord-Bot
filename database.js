@@ -113,13 +113,13 @@ async function SelectData() {
                                   FROM users;`).recordset;
     result.forEach(el => {
         el.changed = false
-        data.users[el["discord_id"]] = el
+        data.users[el.discord_id] = el
     })
     result = (await sql.query`SELECT *
                              FROM servers;`).recordset
     result.forEach(el => {
         el.changed = false
-        data.servers[el["discord_id"]] = el
+        data.servers[el.discord_id] = el
     })
     result = (await sql.query`SELECT *
                              FROM tracking
@@ -127,7 +127,7 @@ async function SelectData() {
                                       JOIN servers ON tracking.id_ser = servers.id_ser;`).recordset
     result.forEach(el => {
         el.changed = false
-        data.tracked[el["id_trc"]] = el
+        data.tracked[el.id_trc] = el
     })
     loaded = true
 }

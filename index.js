@@ -33,7 +33,7 @@ Client.on("message", async msgData => {
     if (msgData.author.bot) return
 
     db.CheckIfNew(msgData.author.id, msgData.author.username, msgData.guild.id, msgData.guild.name);
-    db.NewMessage(msgData.author.id, msgData.author.username)
+    db.NewMessage(msgData.author.id, msgData.author.username, msgData.guild.id, msgData.guild.name)
 
     if (!msgData.content.startsWith(PREFIX)) return
     let messages, map,
