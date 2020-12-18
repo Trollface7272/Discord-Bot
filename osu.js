@@ -549,6 +549,13 @@ class Osu {
             )
             .setFooter(`${beatmap.approvalStatus} | ${beatmap.raw_approvedDate}`)
     }
+    async GetTop100(user, mode) {
+        if (!mode) mode = 0
+        return await OsuApi.getUserBest({u: user, mode: mode})
+    }
+    async GetOsuPlayerId(name) {
+        return (await OsuApi.getUser({u: name})).name
+    }
 }
 
 function DiffRounder(num) {

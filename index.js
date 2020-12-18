@@ -34,7 +34,7 @@ Client.on('ready', async () => {
 Client.on("message", async msgData => {
     if (msgData.author.bot) return
 
-    db.CheckIfNew(msgData.author.id, msgData.author.username)
+    db.CheckIfNew(msgData.author.id, msgData.author.username, msgData.guild.id, msgData.guild.name)
     db.NewMessage(msgData.author.id, msgData.author.username)
 
     if (!msgData.content.startsWith(PREFIX)) return
@@ -69,7 +69,7 @@ Client.on("message", async msgData => {
                 }else return msgData.channel.send("**🔴 Please enter valid number after \`g\`.**")
             }
         }
-        else if (!isNaN(el) && !el.includes(".")) {
+        else if (!isNaN(el) && !el.includes(".") && el <= 100 && el > 0) {
             flags.push("p")
             flagValues[flags.length-1] = el
         }
@@ -179,10 +179,19 @@ Client.on("message", async msgData => {
             msgData.react("✔️")
             break
 
+        case "track": 
+            db.AddToTracking(Osu.GetOsuPlayerId(names[0]), msgData.channel.id, msgData.guild.id, names[0], gameMode, flagValues[flags.indexOf("p")])
+        break
+
         default:
             break;
     }
 })
+
+async function OsuTracking() {
+    
+}
+setInterval(OsuTracking, 6000)
 
 function GetGamemode(name) {
     switch(name) {
