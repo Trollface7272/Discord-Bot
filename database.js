@@ -92,7 +92,7 @@ async function UpdateData() {
         // noinspection JSUnfilteredForInLoop
         const el = data.users[index]
         if (el.changed) {
-            await sql.query`UPDATE users SET messages=${el.messages} discord_name=${el.discord_name} WHERE id=${el.id}`
+            await sql.query`UPDATE users SET messages=${el.messages}, discord_name=${el.discord_name} WHERE id=${el.id}`
             // noinspection JSUnfilteredForInLoop
             data.users[index].changed = false
         }
