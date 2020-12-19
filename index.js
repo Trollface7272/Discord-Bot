@@ -76,7 +76,7 @@ Client.on("message", async msgData => {
             flagValues[flags.length - 1] = el
         } else if (limit < 1) {
         } //Can't really stop looping trough the array cause of flags so just do nothing
-        else if (el.length < 3 || el.match(/[^0-9 A-z_-]/)) await msgData.channel.send("**🔴 Please enter valid user.**") //Minimal username length is 3 | Includes forbidden characters
+        else if (el.length < 3 || el.match(/[^0-9 A-z_-]/)) {} //Minimal username length is 3 | Includes forbidden characters
         else if (names.indexOf(el) !== -1) {
         } // Username already in array
         else names.push(el) //Is username -> add to names
@@ -172,7 +172,7 @@ Client.on("message", async msgData => {
             break
 
         case "track":
-            await db.AddToTracking(Osu.GetOsuPlayerId(names[0]), msgData.channel.id, msgData.guild.id, names[0], gameMode, flagValues[flags.indexOf("p")])
+            await db.AddToTracking(await Osu.GetOsuPlayerId(names[0]), msgData.channel.id, msgData.guild.id, names[0], gameMode, flagValues[flags.indexOf("p")])
             break
 
         default:
@@ -211,9 +211,11 @@ function GetMapFromMessages(messages) {
         if (msg.embeds.length !== 0) {
             if (msg.embeds[0].author && msg.embeds[0].author.url && msg.embeds[0].author.url.startsWith("https://osu.ppy.sh/b/")) {
                 x = RetardedFix(x, msg.embeds[0].author && msg.embeds[0].author.url.split("https://osu.ppy.sh/b/")[1])
+                x = x.replace(/[)]/g, "")
                 return x
             } else if (msg.embeds[0].description && msg.embeds[0].description.includes("https://osu.ppy.sh/b/")) {
                 x = RetardedFix(x, msg.embeds[0].description.split("https://osu.ppy.sh/b/", 2)[1].split(")")[0])
+                x = x.replace(/[)]/g, "")
                 return x
             }
         }

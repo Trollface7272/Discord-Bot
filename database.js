@@ -69,9 +69,9 @@ async function InsertUsersData(id, name) {
     `
     } catch (err) {
     }
+    await UpdateData()
     await SelectData()
 }
-
 async function InsertServersData(id, name) {
     await Connect()
     try {
@@ -83,6 +83,7 @@ async function InsertServersData(id, name) {
     `
     } catch (err) {
     }
+    await UpdateData()
     await SelectData()
 }
 
@@ -92,7 +93,9 @@ async function UpdateData() {
         // noinspection JSUnfilteredForInLoop
         const el = data.users[index]
         if (el.changed) {
-            await sql.query`UPDATE users SET messages=${el.messages}, discord_name=${el.discord_name} WHERE id=${el.id}`
+            await sql.query`UPDATE users 
+                                SET messages=${el.messages}, discord_name=${el.discord_name} 
+                                WHERE id=${el.id}`
             // noinspection JSUnfilteredForInLoop
             data.users[index].changed = false
         }
@@ -101,50 +104,73 @@ async function UpdateData() {
         // noinspection JSUnfilteredForInLoop
         let el = data.servers[index]
         if (el.changed) {
-            await sql.query`UPDATE servers SET messages=${el.messages} WHERE id=${el.id}`
+            await sql.query`UPDATE servers 
+                                SET messages=${el.messages} 
+                                WHERE id_ser=${el.id}`
         }
     }
 }
 
-
 async function SelectData() {
+    await Connect()
+
+    await SelectUsers()
+    await SelectServers()
+    await SelectTracking()
+
+    loaded = true
+}
+async function SelectUsers() {
     await Connect()
     let result = (await sql.query`SELECT *
                                   FROM users;`).recordset;
     result.forEach(el => {
         el.changed = false
+        // noinspection JSUnresolvedVariable
         data.users[el.discord_id] = el
     })
+}
+async function SelectServers() {
+    await Connect()
     result = (await sql.query`SELECT *
                              FROM servers;`).recordset
     result.forEach(el => {
         el.changed = false
+        // noinspection JSUnresolvedVariable
         data.servers[el.discord_id] = el
     })
+}
+async function SelectTracking() {
+    await Connect()
     result = (await sql.query`SELECT *
                              FROM tracking
                                       JOIN tracked_users ON tracking.id_tu = tracked_users.id_tu
                                       JOIN servers ON tracking.id_ser = servers.id_ser;`).recordset
     result.forEach(el => {
         el.changed = false
+        // noinspection JSUnresolvedVariable
         data.tracked[el.id_trc] = el
     })
-    loaded = true
 }
 
 async function SetOsuUsername(discordId, username) {
     await Connect()
-    await sql.query`UPDATE users SET osu_username=${username} WHERE discord_id=${discordId}`
+    await sql.query`UPDATE users 
+                        SET osu_username=${username} 
+                        WHERE discord_id=${discordId}`
     data.users[discordId].osu_username = username
 }
 
 async function AddTracking(userId, channelId, serverId, osuName, mode, limit) {
     await Connect()
-    let id = await (sql.query`SELECT id_tu FROM tracked_users WHERE osu_id = ${userId}`).recordset[0]["id_tu"]
-    if (!id) await (sql.query`INSERT INTO tracked_users (osu_id, osu_name) VALUES (${userId}, ${osuName})`)
-    id = await (sql.query`SELECT id_tu FROM tracked_users WHERE osu_id = ${userId}`).recordset[0]["id_tu"]
-    await (sql.query`INSERT INTO tracking (id_ser, id_tu, channel_id, gamemode, limit) VALUES (${data.servers[serverId]["id_ser"]}, ${id}, ${channelId}, ${mode}, ${limit})`)
-    await SelectData()
+    let result = await sql.query`EXEC AddUserToTracking 
+                                    @user_id    = ${userId}, 
+                                    @channel_id = ${channelId}, 
+                                    @server_id  = ${serverId}, 
+                                    @osu_name   = '${osuName}', 
+                                    @mode       = ${mode}, 
+                                    @limit      = ${limit}`
+    data.tracked[result.id_trc] = result
 }
 
 async function Connect() {

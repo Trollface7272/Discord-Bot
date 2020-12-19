@@ -46,6 +46,11 @@ const
     AR_MS_STEP2 = (AR5_MS - AR10_MS) / 5.0
 
 class ppCalculator {
+    constructor() {
+        if (!fs.existsSync("./cache")){
+            fs.mkdirSync("./cache");
+        }
+    }
     async GetFcPP(play) {
         return await PPCalc(play, true)
     }
@@ -116,7 +121,8 @@ async function PPCalc(play, fc) {
 async function GetBeatmapOsuFile(id) {
     return new Promise((resolve) => {
         request("http://osu.ppy.sh/osu/" + id, function (err, res, body) {
-            fs.writeFile("./cache/" + id + ".osu", body, () => {
+            fs.writeFile("./cache/" + id + ".osu", body, (err) => {
+                if (err) console.log(err)
             })
             resolve(body)
         })

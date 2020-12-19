@@ -165,7 +165,7 @@ class Osu {
             .setAuthor(`${beatmap.title} [${beatmap.version}] +${GetModsFromRaw(recent.raw_mods)} [${TwoDigitValue(beatmap.difficulty.rating)}★]`, `http://s.ppy.sh/a/${profile.id}`, `https://osu.ppy.sh/b/${beatmap.id}`)
             .setThumbnail(`https://assets.ppy.sh/beatmaps/${beatmap.beatmapSetId}/covers/cover.jpg`)
             .setDescription(description)
-            .setFooter(`Try #${tries} | ${DateDiff(new moment(recent.date), new moment(Date.now()))} Ago On osu! Official Server`)
+            .setFooter(`Try #${tries} | ${DateDiff(new moment(recent.date), new moment(Date.now()))}Ago On osu! Official Server`)
 
     }
 
@@ -305,7 +305,7 @@ class Osu {
             description += `**${play.index}. [${map.title} [${map.version}]](https://osu.ppy.sh/b/${map.id}) +${GetModsFromRaw(play.raw_mods)}** [${TwoDigitValue(map.difficulty.rating)}★]\n`
             description += `▸ ${await this.Client.emojis.resolve(GetRankingEmote(play.rank))} ▸ **${TwoDigitValue(play.pp)}pp** ${fcppDisplay}▸ ${TwoDigitValue(CalculateAcc(play.counts) * 100)}%\n`
             description += `▸ ${play.score} ▸ x${play.maxCombo}/${map.maxCombo} ▸ [${play.counts[300]}/${play.counts[100]}/${play.counts[50]}/${play.counts.miss}]\n`
-            description += `▸ Score Set ${DateDiff(new moment(play.date), new moment(Date.now()))} Ago\n`
+            description += `▸ Score Set ${DateDiff(new moment(play.date), new moment(Date.now()))}Ago\n`
         }
         return new
         Discord.MessageEmbed()
@@ -374,7 +374,7 @@ class Osu {
             let description = `**${i + 1}.** \`${GetModsFromRaw(score.raw_mods)}\` **Score** [${TwoDigitValue(await Calculator.GetStarsWithMods(map, score.raw_mods))}★]\n`
             description += `▸ ${await this.Client.emojis.resolve(GetRankingEmote(score.rank))} ▸ **${TwoDigitValue(score.pp)}pp** ${fcppDisplay}▸ ${TwoDigitValue(CalculateAcc(score.counts) * 100)}%\n`
             description += `▸ ${score.score} ▸ x${score.maxCombo}/${beatmap.maxCombo} ▸ [${score.counts[300]}/${score.counts[100]}/${score.counts[50]}/${score.counts.miss}]\n`
-            description += `▸ Score Set ${DateDiff(new moment(score.date), new moment(Date.now()))} Ago\n`
+            description += `▸ Score Set ${DateDiff(new moment(score.date), new moment(Date.now()))}Ago\n`
             descriptionArr.push(description)
         }
         let length = descriptionArr.length + 2
@@ -597,13 +597,13 @@ class Osu {
             .setFooter(`${beatmap.approvalStatus} | ${beatmap.raw_approvedDate}`)
     }
 
-    async GetTop100(user, mode) {
+    async CheckForNewTopPlays(user, mode) {
         if (!mode) mode = 0
         return await OsuApi.getUserBest({u: user, mode: mode})
     }
 
     async GetOsuPlayerId(name) {
-        return (await OsuApi.getUser({u: name})).name
+        return (await OsuApi.getUser({u: name})).id
     }
 }
 
