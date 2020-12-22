@@ -47,6 +47,10 @@ class Database {
         return data.users[discordId].osu_username || "Not Found"
     }
 
+    /**
+     *
+     * @returns {Object[]}
+     */
     GetTrackedUsers() {
         return data.tracked
     }
@@ -106,7 +110,7 @@ async function UpdateData() {
         if (el.changed) {
             await sql.query`UPDATE servers 
                                 SET messages=${el.messages} 
-                                WHERE id_ser=${el.id}`
+                                WHERE id_ser=${el.id_ser}`
         }
     }
 }
@@ -149,7 +153,7 @@ async function SelectTracking() {
     result.forEach(el => {
         el.changed = false
         // noinspection JSUnresolvedVariable
-        data.tracked[el.id_trc] = el
+        data.tracked.push(el)
     })
 }
 
