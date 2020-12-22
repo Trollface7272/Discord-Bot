@@ -168,11 +168,14 @@ Client.on("message", async msgData => {
             if (!splitMsg[0]) return msgData.channel.send("**🔴 Please specify user.**")
             if (splitMsg[0].length < 3) return msgData.channel.send("**🔴 Please enter a valid user.**")
             await db.SetOsuUsername(msgData.author.id, splitMsg[0])
-            await msgData.react("✔️")
+            msgData.react("✔")
             break
 
         case "track":
-            await db.AddToTracking(await Osu.GetOsuPlayerId(names[0]), msgData.channel.id, msgData.guild.id, names[0], gameMode, flagValues[flags.indexOf("p")])
+            if (await Osu.CheckIfExists(names[0]))
+                await db.AddToTracking(await Osu.GetOsuPlayerId(names[0]), msgData.channel.id, msgData.guild.id, names[0], gameMode, flagValues[flags.indexOf("p")])
+            else return msgData.channel.send("**🔴 User does not exist.**")
+            msgData.react("✔")
             break
 
         default:
@@ -180,11 +183,38 @@ Client.on("message", async msgData => {
     }
 })
 
+let lastCheck = 0
+let lastCheckDate = Date.now()
+//new Date(2020, 11, 19, 0, 0, 0, 0)
+
 async function OsuTracking() {
+    let trackedUsers = db.GetTrackedUsers()
+    let user = trackedUsers[lastCheck]
+    if (!user) return
 
+    let topPlays = await Osu.GetTopPlaysSorted(user.osu_id, user.gamemode, user.t_limit)
+    let newTopPlays = []
+
+    for (let key in topPlays) {
+        const el = topPlays[key]
+
+        if (lastCheckDate > new Date(el.raw_date)) break
+        console.log("Found new play")
+        newTopPlays.push(el)
+    }
+    lastCheckDate = new Date()
+    if (newTopPlays.length < 1) return
+    let channel = await Client.channels.fetch(user.channel_id)
+    newTopPlays.forEach(async el => {
+        console.log("homo")
+        channel.send(await Osu.CreateOnePlayEmbed(el, user.gamemode))
+    })
+    lastCheckDate = Date.now()
+
+    if (trackedUsers.length >= lastCheck) lastCheck = 0
+    else lastCheck++
 }
-
-setInterval(OsuTracking, 6000)
+setInterval(OsuTracking, 60000)
 
 function GetGamemode(name) {
     switch (name) {
