@@ -163,7 +163,7 @@ class Osu {
 
         return new Discord.MessageEmbed()
             .setAuthor(`${beatmap.title} [${beatmap.version}] +${GetModsFromRaw(recent.raw_mods)} [${TwoDigitValue(beatmap.difficulty.rating)}★]`, `http://s.ppy.sh/a/${profile.id}`, `https://osu.ppy.sh/b/${beatmap.id}`)
-            .setThumbnail(`https://assets.ppy.sh/beatmaps/${beatmap.beatmapSetId}/covers/cover.jpg`)
+            .setThumbnail(`https://b.ppy.sh/thumb/${beatmap.beatmapSetId}l.jpg`)
             .setDescription(description)
             .setFooter(`Try #${tries} | ${DateDiff(new moment(recent.date), new moment(Date.now()))}Ago On osu! Official Server`)
 
@@ -343,7 +343,7 @@ class Osu {
             const play = topPlays[i];
             if (play.pp > ammount) counter++
         }
-        return `**${profile.name} has ${counter} plays worth more then ${(ammount).toFixed(2)}pp**`
+        return `**${profile.name} has ${counter} plays worth more then ${parseFloat(ammount+"").toFixed(2)}pp**`
     }
 
     async GetUserBestOnMap(user, map, mode) {
@@ -385,7 +385,7 @@ class Osu {
         Discord.MessageEmbed()
             .setAuthor(`Top ${ModNames[mode]} Plays for ${profile.name} on ${beatmap.title} [${beatmap.version}]`, `http://s.ppy.sh/a/${profile.id}`, `https://osu.ppy.sh/b/${map}`)
             .setDescription(descriptionArr[0] + descriptionArr[1] + descriptionArr[2])
-            .setThumbnail(`https://assets.ppy.sh/beatmaps/${beatmap.beatmapSetId}/covers/cover.jpg`)
+            .setThumbnail(`https://b.ppy.sh/thumb/${beatmap.beatmapSetId}l.jpg`)
             .setFooter("On osu! Official Server | Page 1 of 1")
     }
 
@@ -506,7 +506,7 @@ class Osu {
         return new
         Discord.MessageEmbed()
             .setAuthor(`${beatmap.artist} - ${beatmap.title} by ${beatmap.creator}`, ``, `https://osu.ppy.sh/b/${beatmap.id}`)
-            .setThumbnail(`https://assets.ppy.sh/beatmaps/${beatmap.beatmapSetId}/covers/cover.jpg`)
+            .setThumbnail(`https://b.ppy.sh/thumb/${beatmap.beatmapSetId}l.jpg`)
             .setDescription(description)
             .setFooter(`${beatmap.approvalStatus} | ${beatmap.counts.favourites} ❤︎ | Approved ${beatmap.raw_approvedDate}`)
     }
@@ -597,13 +597,45 @@ class Osu {
             .setFooter(`${beatmap.approvalStatus} | ${beatmap.raw_approvedDate}`)
     }
 
-    async CheckForNewTopPlays(user, mode) {
+    async GetTopPlaysSorted(user, mode, limit) {
         if (!mode) mode = 0
-        return await OsuApi.getUserBest({u: user, mode: mode})
+        let plays = await OsuApi.getUserBest({u: user, mode: mode, limit: limit})
+        for (let i = 0; i < plays.length; i++) plays[i].index = i+1
+        plays.sort(function (a, b) {
+            const dateA = new Date(a.date), dateB = new Date(b.date);
+            return dateB - dateA
+        })
+        return plays
     }
 
     async GetOsuPlayerId(name) {
         return (await OsuApi.getUser({u: name})).id
+    }
+
+    async CheckIfExists(user) {
+        try {
+            await OsuApi.getUser({u: user})
+            return true
+        } catch(err) {
+            return false
+        }
+    }
+
+    async CreateOnePlayEmbed(play, mode) {
+        let profile = await OsuApi.getUser({u: play.user.id, m: mode})
+        let beatmap = (await OsuApi.getBeatmaps({b: play.beatmapId, mods: RemoveNonDiffMods(play.raw_mods)}))[0]
+
+        let description  = `▸ [**${beatmap.title} [${beatmap.version}]**](https://osu.ppy.sh/b/${beatmap.id})`
+            description += `\n▸ **${TwoDigitValue(beatmap.difficulty.rating)}★** ▸ ${Math.floor(beatmap.length.drain / 60)}:${Math.floor(beatmap.length.drain % 60)} ▸ ${beatmap.bpm}bpm ▸ +${GetModsFromRaw(play.raw_mods)}`
+            description += `\n▸ **${await this.Client.emojis.resolve(GetRankingEmote(play.rank))}** ▸ **${TwoDigitValue(CalculateAcc(play.counts) * 100)}%** ▸ **${play.pp}pp**` /* TODO: add pp difference */
+            description += `\n▸ ${play.score} ▸ x${play.maxCombo}/${beatmap.maxCombo} ▸ [${play.counts["300"]}/${play.counts["100"]}/${play.counts["50"]}/${play.counts.miss}]`
+            //description += `\n▸ #74267 → #72317 (CZ#505 → #494)` TODO: this
+        return new
+            Discord.MessageEmbed()
+            .setAuthor(`New #${play.index} for ${profile.name} in ${ModNames[mode]}`, `http://s.ppy.sh/a/${profile.id}`, `https://osu.ppy.sh/u/${profile.id}`)
+            .setDescription(description)
+            .setFooter(`${DateDiff(new moment(play.date), new moment(Date.now()))}Ago On osu! Official Server`)
+            .setThumbnail(`https://b.ppy.sh/thumb/${beatmap.beatmapSetId}l.jpg`)
     }
 }
 
