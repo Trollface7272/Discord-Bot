@@ -200,7 +200,6 @@ async function OsuTracking() {
             user.play_map == el.beatmapId &&
             user.play_score == el.score
         ) break
-        console.log(el)
         newTopPlays.push(el)
     }
 
@@ -213,12 +212,12 @@ async function OsuTracking() {
     if (trackedUsers.length >= lastCheck) lastCheck = 0
     else lastCheck++
 }
-setInterval(OsuTracking, 6000)
+setInterval(OsuTracking, 30 * 1000)
 
 async function NewTopPlays(user, scores) {
     let tracked = db.GetTrackedUsers()
     let embeds = []
-    for (const el of scores) embeds.push(await Osu.CreateTrackingEmbed(el, user.gamemode))
+    for (const el of scores) embeds.push(await Osu.CreateTrackingEmbed(el, user))
 
     for (let el of tracked) {
         if (el.id_tu[0] === user.id_tu) {

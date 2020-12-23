@@ -156,6 +156,7 @@ async function SelectServers() {
 }
 async function SelectTracking() {
     await Connect()
+    data.tracked = []
     result = (await sql.query`SELECT *
                              FROM tracking
                                       JOIN tracked_users ON tracking.id_tu = tracked_users.id_tu
@@ -168,6 +169,7 @@ async function SelectTracking() {
 }
 async function SelectTrackedUsers() {
     await Connect()
+    data.trackedUsers = []
     result = (await sql.query`SELECT * FROM tracked_users`).recordset
 
     result.forEach(el => {
