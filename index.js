@@ -159,7 +159,7 @@ Client.on("message", async msgData => {
         case "map":
             messages = await msgData.channel.messages.fetch({limit: 50})
             map = GetMapFromMessages(messages)
-            let mods = flags.indexOf("mods") !== -1 ? flagValues[flags.indexOf("mods")] : flagValues[names[0]]
+            let mods = flags.indexOf("mods") !== -1 ? flagValues[flags.indexOf("mods")] : names[0]
             if (map === "Not Found") return msgData.channel.send("**🔴 No maps found in conversation.**")
             await msgData.channel.send(await Osu.GetMap(map, gameMode, mods, flags.indexOf("acc") !== -1 ? flagValues[flags.indexOf("acc")] : undefined))
             break
