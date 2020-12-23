@@ -627,7 +627,7 @@ class Osu {
     }
 
     async CreateTrackingEmbed(play, user) {
-        let profile = await OsuApi.getUser({u: play.user.id, m: user.mode})
+        let profile = await OsuApi.getUser({u: play.user.id, m: user.gamemode})
         let beatmap = (await OsuApi.getBeatmaps({b: play.beatmapId, mods: RemoveNonDiffMods(play.raw_mods)}))[0]
 
         let description  = `▸ [**${beatmap.title} [${beatmap.version}]**](https://osu.ppy.sh/b/${beatmap.id})`
@@ -636,7 +636,7 @@ class Osu {
             description += `\n▸ ${play.score} ▸ x${play.maxCombo}/${beatmap.maxCombo} ▸ [${play.counts["300"]}/${play.counts["100"]}/${play.counts["50"]}/${play.counts.miss}]`
             description += `\n▸ #${user.rank} → #${profile.pp.rank} (CZ#${user.country_rank} → #${profile.pp.countryRank})`
         let embed = new Discord.MessageEmbed()
-            .setAuthor(`New #${play.index} for ${profile.name} in ${ModNames[user.mode]}`, `http://s.ppy.sh/a/${profile.id}`, `https://osu.ppy.sh/u/${profile.id}`)
+            .setAuthor(`New #${play.index} for ${profile.name} in ${ModNames[user.gamemode]}`, `http://s.ppy.sh/a/${profile.id}`, `https://osu.ppy.sh/u/${profile.id}`)
             .setDescription(description)
             .setFooter(`${DateDiff(new moment(play.date), new moment(Date.now()))}Ago On osu! Official Server`)
             .setThumbnail(`https://b.ppy.sh/thumb/${beatmap.beatmapSetId}l.jpg`)

@@ -64,8 +64,8 @@ class Database {
         await AddTracking(userId, channelId, serverId, osuName, mode, limit, pp, playPp, playMap, playScore, rank, countryRank)
     }
 
-    UpdateTracking(id, pp, rank, countryRank, playPp, playMap, playScore) {
-        UpdateTrack(id, pp, rank, countryRank, playPp, playMap, playScore)
+    async UpdateTracking(id, pp, rank, countryRank, playPp, playMap, playScore) {
+        await UpdateTrack(id, pp, rank, countryRank, playPp, playMap, playScore)
     }
 }
 

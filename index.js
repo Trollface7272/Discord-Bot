@@ -197,16 +197,17 @@ async function OsuTracking() {
     for (const el of topPlays) {
         // noinspection EqualityComparisonWithCoercionJS
         if (
-            user.play_map == el.beatmapId &&
             user.play_score == el.score
         ) break
         newTopPlays.push(el)
+        // noinspection EqualityComparisonWithCoercionJS
+        if (user.play_map == el.beatmapId) break
     }
 
     if (newTopPlays.length > 0) {
         NewTopPlays(user, newTopPlays)
         let profile = await Osu.GetOsuPlayerProfile(user.osu_id, user.gamemode)
-        db.UpdateTracking(user.id_tu, profile.pp.raw, profile.pp.rank, profile.pp.countryRank, newTopPlays[0].pp, newTopPlays[0].beatmapId, newTopPlays[0].score)
+        await db.UpdateTracking(user.id_tu, profile.pp.raw, profile.pp.rank, profile.pp.countryRank, newTopPlays[0].pp, newTopPlays[0].beatmapId, newTopPlays[0].score)
     }
 
     if (trackedUsers.length >= lastCheck) lastCheck = 0
