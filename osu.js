@@ -161,6 +161,11 @@ class Osu {
         description = `▸ ${await this.Client.emojis.resolve(GetRankingEmote(recent.rank))} ▸ **${TwoDigitValue(await Calculator.GetPlayPP(recent))}pp** ${fcppDisplay}▸ ${TwoDigitValue(CalculateAcc(recent.counts) * 100)}%\n`
         description += `▸ ${recent.score} ▸ x${recent.maxCombo}/${beatmap.maxCombo} ▸ [${recent.counts[300]}/${recent.counts[100]}/${recent.counts[50]}/${recent.counts.miss}]`
 
+
+        if (beatmap.objects.normal + beatmap.objects.slider + beatmap.objects.spinner !== recent.counts[300] + recent.counts[100] + recent.counts[50] + recent.counts.miss)
+            description += `\n▸ **Map Completion:** ${TwoDigitValue((recent.counts[300] + recent.counts[100] + recent.counts[50] + recent.counts.miss) / (beatmap.objects.normal + beatmap.objects.slider + beatmap.objects.spinner) * 100)}%`
+
+
         return new Discord.MessageEmbed()
             .setAuthor(`${beatmap.title} [${beatmap.version}] +${GetModsFromRaw(recent.raw_mods)} [${TwoDigitValue(beatmap.difficulty.rating)}★]`, `http://s.ppy.sh/a/${profile.id}`, `https://osu.ppy.sh/b/${beatmap.id}`)
             .setThumbnail(`https://b.ppy.sh/thumb/${beatmap.beatmapSetId}l.jpg`)
@@ -224,9 +229,9 @@ class Osu {
             } else DEBUG.log("Error in GetRecentPlay - Recent", error.message, DEBUG.LEVELS.ERRORS)
             return
         }
-        for (let i = 0; i < topPlays.length; i++) {
+        for (let i = 0; i < topPlays.length; i++)
             topPlays[i].index = i + 1
-        }
+
         topPlays.sort(function (a, b) {
             const dateA = new Date(a.date), dateB = new Date(b.date);
             return sort ? dateB - dateA : dateA - dateB
@@ -597,9 +602,9 @@ class Osu {
             .setFooter(`${beatmap.approvalStatus} | ${beatmap.raw_approvedDate}`)
     }
 
-    async GetTopPlaysSorted(user, mode, limit) {
+    async GetTopPlaysSorted(user, mode) {
         if (!mode) mode = 0
-        let plays = await OsuApi.getUserBest({u: user, mode: mode, limit: limit})
+        let plays = await OsuApi.getUserBest({u: user, mode: mode, limit: 100})
         for (let i = 0; i < plays.length; i++) plays[i].index = i+1
         plays.sort(function (a, b) {
             const dateA = new Date(a.date), dateB = new Date(b.date);
@@ -608,8 +613,8 @@ class Osu {
         return plays
     }
 
-    async GetOsuPlayerId(name) {
-        return (await OsuApi.getUser({u: name})).id
+    async GetOsuPlayerProfile(name, mode) {
+        return (await OsuApi.getUser({u: name, m: mode}))
     }
 
     async CheckIfExists(user) {
@@ -621,7 +626,7 @@ class Osu {
         }
     }
 
-    async CreateOnePlayEmbed(play, mode) {
+    async CreateTrackingEmbed(play, mode) {
         let profile = await OsuApi.getUser({u: play.user.id, m: mode})
         let beatmap = (await OsuApi.getBeatmaps({b: play.beatmapId, mods: RemoveNonDiffMods(play.raw_mods)}))[0]
 
@@ -630,13 +635,15 @@ class Osu {
             description += `\n▸ **${await this.Client.emojis.resolve(GetRankingEmote(play.rank))}** ▸ **${TwoDigitValue(CalculateAcc(play.counts) * 100)}%** ▸ **${play.pp}pp**` /* TODO: add pp difference */
             description += `\n▸ ${play.score} ▸ x${play.maxCombo}/${beatmap.maxCombo} ▸ [${play.counts["300"]}/${play.counts["100"]}/${play.counts["50"]}/${play.counts.miss}]`
             //description += `\n▸ #74267 → #72317 (CZ#505 → #494)` TODO: this
-        return new
-            Discord.MessageEmbed()
+        let embed = new Discord.MessageEmbed()
             .setAuthor(`New #${play.index} for ${profile.name} in ${ModNames[mode]}`, `http://s.ppy.sh/a/${profile.id}`, `https://osu.ppy.sh/u/${profile.id}`)
             .setDescription(description)
             .setFooter(`${DateDiff(new moment(play.date), new moment(Date.now()))}Ago On osu! Official Server`)
             .setThumbnail(`https://b.ppy.sh/thumb/${beatmap.beatmapSetId}l.jpg`)
+        embed.index = play.index
+        return embed
     }
+
 }
 
 function DiffRounder(num) {

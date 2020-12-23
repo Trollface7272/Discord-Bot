@@ -110,7 +110,7 @@ Client.on("message", async msgData => {
                 else if (flags.indexOf("b") !== -1) recent = await Osu.GetRecentBest(name1, gameMode)
                 else if (flags.indexOf("d") !== -1) recent = await Osu.GetRecentDetailed(name1, gameMode)
                 else recent = await Osu.GetRecentPlay(name1, gameMode) //Get user data from osu api
-                await msgData.channel.send(recent) //Get embed from the date and send it
+                await msgData.channel.send(recent)
             }
             break
 
@@ -172,9 +172,11 @@ Client.on("message", async msgData => {
             break
 
         case "track":
-            if (await Osu.CheckIfExists(names[0]))
-                await db.AddToTracking(await Osu.GetOsuPlayerId(names[0]), msgData.channel.id, msgData.guild.id, names[0], gameMode, flagValues[flags.indexOf("p")])
-            else return msgData.channel.send("**🔴 User does not exist.**")
+            if (await Osu.CheckIfExists(names[0])) {
+                let profile = await Osu.GetOsuPlayerProfile(names[0], gameMode)
+                let newestTopPlay = (await Osu.GetTopPlaysSorted(names[0], gameMode, 100))[0]
+                await db.AddToTracking(profile.id, msgData.channel.id, msgData.guild.id, names[0], gameMode, flagValues[flags.indexOf("p")] || 100, profile.pp.raw, newestTopPlay.pp, newestTopPlay.beatmapId, newestTopPlay.score, profile.pp.rank, profile.pp.countryRank)
+            } else return msgData.channel.send("**🔴 User does not exist.**")
             msgData.react("✔")
             break
 
@@ -184,37 +186,51 @@ Client.on("message", async msgData => {
 })
 
 let lastCheck = 0
-let lastCheckDate = Date.now()
-//new Date(2020, 11, 19, 0, 0, 0, 0)
 
 async function OsuTracking() {
-    let trackedUsers = db.GetTrackedUsers()
+    let trackedUsers = db.GetTrackedProfiles()
     let user = trackedUsers[lastCheck]
     if (!user) return
 
-    let topPlays = await Osu.GetTopPlaysSorted(user.osu_id, user.gamemode, user.t_limit)
+    let topPlays = await Osu.GetTopPlaysSorted(user.osu_id, user.gamemode)
     let newTopPlays = []
-
-    for (let key in topPlays) {
-        const el = topPlays[key]
-
-        if (lastCheckDate > new Date(el.raw_date)) break
-        console.log("Found new play")
+    for (const el of topPlays) {
+        // noinspection EqualityComparisonWithCoercionJS
+        if (
+            user.play_map == el.beatmapId &&
+            user.play_score == el.score
+        ) break
+        console.log(el)
         newTopPlays.push(el)
     }
-    lastCheckDate = new Date()
-    if (newTopPlays.length < 1) return
-    let channel = await Client.channels.fetch(user.channel_id)
-    newTopPlays.forEach(async el => {
-        console.log("homo")
-        channel.send(await Osu.CreateOnePlayEmbed(el, user.gamemode))
-    })
-    lastCheckDate = Date.now()
+
+    if (newTopPlays.length > 0) {
+        NewTopPlays(user, newTopPlays)
+        let profile = await Osu.GetOsuPlayerProfile(user.osu_id, user.gamemode)
+        db.UpdateTracking(user.id_tu, profile.pp.raw, profile.pp.rank, profile.pp.countryRank, newTopPlays[0].pp, newTopPlays[0].beatmapId, newTopPlays[0].score)
+    }
 
     if (trackedUsers.length >= lastCheck) lastCheck = 0
     else lastCheck++
 }
-setInterval(OsuTracking, 60000)
+setInterval(OsuTracking, 6000)
+
+async function NewTopPlays(user, scores) {
+    let tracked = db.GetTrackedUsers()
+    let embeds = []
+    for (const el of scores) embeds.push(await Osu.CreateTrackingEmbed(el, user.gamemode))
+
+    for (let el of tracked) {
+        if (el.id_tu[0] === user.id_tu) {
+            let channel = await Client.channels.fetch(el.channel_id)
+            embeds.forEach(embed => {
+                if (embed.index <= el.t_limit)
+                    channel.send(embed)
+            })
+        }
+    }
+}
+
 
 function GetGamemode(name) {
     switch (name) {

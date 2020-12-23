@@ -3,7 +3,8 @@ const
 let data = {
     users: [],
     servers: [],
-    tracked: []
+    tracked: [],
+    trackedUsers: []
 }
 let loaded = false;
 
@@ -55,8 +56,16 @@ class Database {
         return data.tracked
     }
 
-    async AddToTracking(userId, channelId, serverId, osuName, mode, limit) {
-        await AddTracking(userId, channelId, serverId, osuName, mode, limit)
+    GetTrackedProfiles() {
+        return data.trackedUsers
+    }
+
+    async AddToTracking(userId, channelId, serverId, osuName, mode, limit, pp, playPp, playMap, playScore, rank, countryRank) {
+        await AddTracking(userId, channelId, serverId, osuName, mode, limit, pp, playPp, playMap, playScore, rank, countryRank)
+    }
+
+    UpdateTracking(id, pp, rank, countryRank, playPp, playMap, playScore) {
+        UpdateTrack(id, pp, rank, countryRank, playPp, playMap, playScore)
     }
 }
 
@@ -121,6 +130,7 @@ async function SelectData() {
     await SelectUsers()
     await SelectServers()
     await SelectTracking()
+    await SelectTrackedUsers()
 
     loaded = true
 }
@@ -156,6 +166,16 @@ async function SelectTracking() {
         data.tracked.push(el)
     })
 }
+async function SelectTrackedUsers() {
+    await Connect()
+    result = (await sql.query`SELECT * FROM tracked_users`).recordset
+
+    result.forEach(el => {
+        el.changed = false
+        // noinspection JSUnresolvedVariable
+        data.trackedUsers.push(el)
+    })
+}
 
 async function SetOsuUsername(discordId, username) {
     await Connect()
@@ -165,16 +185,33 @@ async function SetOsuUsername(discordId, username) {
     data.users[discordId].osu_username = username
 }
 
-async function AddTracking(userId, channelId, serverId, osuName, mode, limit) {
+async function AddTracking(userId, channelId, serverId, osuName, mode, limit, pp, playPp, playMap, playScore, rank, countryRank) {
     await Connect()
     let result = await sql.query`EXEC AddUserToTracking 
-                                    @user_id    = ${userId}, 
-                                    @channel_id = ${channelId}, 
-                                    @server_id  = ${serverId}, 
-                                    @osu_name   = '${osuName}', 
-                                    @mode       = ${mode}, 
-                                    @limit      = ${limit}`
+                                    @user_id      = ${userId}, 
+                                    @channel_id   = ${channelId}, 
+                                    @server_id    = ${serverId}, 
+                                    @osu_name     = ${osuName}, 
+                                    @mode         = ${mode}, 
+                                    @limit        = ${limit},
+                                    @pp           = ${pp},
+                                    @play_pp      = ${playPp},
+                                    @play_map     = ${playMap},
+                                    @play_score   = ${playScore},
+                                    @rank         = ${rank},
+                                    @country_rank = ${countryRank}`
     data.tracked[result.id_trc] = result
+}
+async function UpdateTrack(id, pp, rank, countryRank, playPp, playMap, playScore) {
+    sql.query`EXEC update_tracked 
+                            @pp             = ${pp},
+                            @rank           = ${rank},
+                            @country_rank   = ${countryRank},
+                            @play_pp        = ${playPp},
+                            @play_map       = ${playMap},
+                            @play_score     = ${playScore},
+                            @id_tu          = ${id}`
+    SelectTrackedUsers()
 }
 
 async function Connect() {
