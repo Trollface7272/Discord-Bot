@@ -305,7 +305,7 @@ class Osu {
                 m: mode
             }))[0]
             let fcppDisplay = ""
-            if (play.maxCombo < map.maxCombo - 15 || play.counts.miss > 0) fcppDisplay = `(${TwoDigitValue(await Calculator.GetFcPP(play))}pp for ${TwoDigitValue(Calculator.GetFcAcc(play) * 100)}% FC) `
+            if (play.maxCombo < map.maxCombo - 15 || play.counts.miss > 0 && mode !== 3) fcppDisplay = `(${TwoDigitValue(await Calculator.GetFcPP(play))}pp for ${TwoDigitValue(Calculator.GetFcAcc(play) * 100)}% FC) `
 
             description += `**${play.index}. [${map.title} [${map.version}]](https://osu.ppy.sh/b/${map.id}) +${GetModsFromRaw(play.raw_mods)}** [${TwoDigitValue(map.difficulty.rating)}★]\n`
             description += `▸ ${await this.Client.emojis.resolve(GetRankingEmote(play.rank))} ▸ **${TwoDigitValue(play.pp)}pp** ${fcppDisplay}▸ ${TwoDigitValue(CalculateAcc(play.counts) * 100)}%\n`
