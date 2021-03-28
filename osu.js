@@ -110,7 +110,7 @@ class Osu {
                 .setAuthor(`${ModNames[mode]} Profile for ${profile.name}`, `https://www.countryflags.io/${profile.country.toLowerCase()}/flat/64.png`, `https://osu.ppy.sh/users/${profile.id}/${ModLinkNames[mode]}`)
                 .setDescription(description)
                 .setFooter(`On osu! Official Server`)
-                .setThumbnail(`http://s.ppy.sh/a/${profile.id}`)
+                .setThumbnail(`http://s.ppy.sh/a/${profile.id}?hjdjkf=${Date.now()}`)
         } catch (error) {
             if (error instanceof Error && error.message === "Not found") {
                 return `**🔴 ${user} not found.**`
@@ -167,7 +167,7 @@ class Osu {
 
 
         return new Discord.MessageEmbed()
-            .setAuthor(`${beatmap.title} [${beatmap.version}] +${GetModsFromRaw(recent.raw_mods)} [${TwoDigitValue(beatmap.difficulty.rating)}★]`, `http://s.ppy.sh/a/${profile.id}`, `https://osu.ppy.sh/b/${beatmap.id}`)
+            .setAuthor(`${beatmap.title} [${beatmap.version}] +${GetModsFromRaw(recent.raw_mods)} [${TwoDigitValue(beatmap.difficulty.rating)}★]`, `http://s.ppy.sh/a/${profile.id}?hjdjkf=${Date.now()}`, `https://osu.ppy.sh/b/${beatmap.id}`)
             .setThumbnail(`https://b.ppy.sh/thumb/${beatmap.beatmapSetId}l.jpg`)
             .setDescription(description)
             .setFooter(`Try #${tries} | ${DateDiff(new moment(recent.date), new moment(Date.now()))}Ago On osu! Official Server`)
@@ -317,7 +317,7 @@ class Osu {
             .setAuthor(author[0], `https://www.countryflags.io/${profile.country.toLowerCase()}/flat/64.png`, author[1])
             .setDescription(description)
             .setFooter("On osu! Official Server")
-            .setThumbnail(`http://s.ppy.sh/a/${profile.id}`)
+            .setThumbnail(`http://s.ppy.sh/a/${profile.id}?hjdjkf=${Date.now()}`)
     }
 
     /**
@@ -388,7 +388,7 @@ class Osu {
         }
         return new
         Discord.MessageEmbed()
-            .setAuthor(`Top ${ModNames[mode]} Plays for ${profile.name} on ${beatmap.title} [${beatmap.version}]`, `http://s.ppy.sh/a/${profile.id}`, `https://osu.ppy.sh/b/${map}`)
+            .setAuthor(`Top ${ModNames[mode]} Plays for ${profile.name} on ${beatmap.title} [${beatmap.version}]`, `http://s.ppy.sh/a/${profile.id}?hjdjkf=${Date.now()}`, `https://osu.ppy.sh/b/${map}`)
             .setDescription(descriptionArr[0] + descriptionArr[1] + descriptionArr[2])
             .setThumbnail(`https://b.ppy.sh/thumb/${beatmap.beatmapSetId}l.jpg`)
             .setFooter("On osu! Official Server | Page 1 of 1")
@@ -555,7 +555,7 @@ class Osu {
         // noinspection JSCheckFunctionSignatures
         return new
         Discord.MessageEmbed()
-            .setAuthor(`Most Recent Play by ${profile.name}`, `http://s.ppy.sh/a/${profile.id}`, `https://osu.ppy.sh/users/${profile.id}/${ModLinkNames[mode]}`)
+            .setAuthor(`Most Recent Play by ${profile.name}`, `http://s.ppy.sh/a/${profile.id}?hjdjkf=${Date.now()}`, `https://osu.ppy.sh/users/${profile.id}/${ModLinkNames[mode]}`)
             .addFields(
                 {
                     name: "Beatmap",
@@ -636,7 +636,7 @@ class Osu {
             description += `\n▸ ${play.score} ▸ x${play.maxCombo}/${beatmap.maxCombo} ▸ [${play.counts["300"]}/${play.counts["100"]}/${play.counts["50"]}/${play.counts.miss}]`
             description += `\n▸ #${user.rank} → #${profile.pp.rank} (CZ#${user.country_rank} → #${profile.pp.countryRank})`
         let embed = new Discord.MessageEmbed()
-            .setAuthor(`New #${play.index} for ${profile.name} in ${ModNames[user.gamemode]}`, `http://s.ppy.sh/a/${profile.id}`, `https://osu.ppy.sh/u/${profile.id}`)
+            .setAuthor(`New #${play.index} for ${profile.name} in ${ModNames[user.gamemode]}`, `http://s.ppy.sh/a/${profile.id}?hjdjkf=${Date.now()}`, `https://osu.ppy.sh/u/${profile.id}`)
             .setDescription(description)
             .setFooter(`${DateDiff(new moment(play.date), new moment(Date.now()))}Ago On osu! Official Server`)
             .setThumbnail(`https://b.ppy.sh/thumb/${beatmap.beatmapSetId}l.jpg`)
