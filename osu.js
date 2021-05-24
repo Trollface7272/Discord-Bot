@@ -307,7 +307,7 @@ async function Recent(args) {
     let fcppDisplay = ""
     if (mostRecent.maxCombo < beatmap.maxCombo - 15 || mostRecent.counts.miss > 0) fcppDisplay = `(${Utils.ToFixedRound(await Calculator.GetFcPP(mostRecent), 2)}pp for ${Utils.ToFixedRound(Calculator.GetFcAcc(mostRecent) * 100, 2)}% FC) `
     description = `▸ ${Utils.GetEmoji(mostRecent.rank)} ▸ **${Utils.ToFixedRound(await Calculator.GetPlayPP(mostRecent), 2)}pp** ${fcppDisplay}▸ ${Utils.ToFixedRound(CalculateAcc(mostRecent.counts) * 100, 2)}%\n`
-    description += `▸ ${mostRecent.score} ▸ x${mostRecent.maxCombo}/${beatmap.maxCombo} ▸ [${mostRecent.counts[300]}/${mostRecent.counts[100]}/${mostRecent.counts[50]}/${mostRecent.counts.miss}]`
+    description += `▸ ${Utils.FormatNumberWithCommas(mostRecent.score)} ▸ x${mostRecent.maxCombo}/${beatmap.maxCombo} ▸ [${mostRecent.counts[300]}/${mostRecent.counts[100]}/${mostRecent.counts[50]}/${mostRecent.counts.miss}]`
 
     if (beatmap.objects.normal + beatmap.objects.slider + beatmap.objects.spinner !== mostRecent.counts[300] + mostRecent.counts[100] + mostRecent.counts[50] + mostRecent.counts.miss)
             description += `\n▸ **Map Completion:** ${Utils.ToFixedRound((mostRecent.counts[300] + mostRecent.counts[100] + mostRecent.counts[50] + mostRecent.counts.miss) / (beatmap.objects.normal + beatmap.objects.slider + beatmap.objects.spinner) * 100, 2)}%`
