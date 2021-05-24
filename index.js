@@ -1,6 +1,6 @@
 const DiscordJS = require("discord.js")
 const DisCl = new DiscordJS.Client()
-
+const osu = require("./osu")
 const Commands = {
     osu : [
         "mania", "ctb", "taiko", "osu",
@@ -14,7 +14,7 @@ const Commands = {
 }
 
 const CommandHandles = {
-    osu : require("./osu").Command
+    osu : osu.Command
 }
 
 
@@ -39,6 +39,7 @@ function CheckIfIsCommand(text) {
 
 DisCl.on("ready", () => {
     print(`Logged in as ${DisCl.user.tag}`)
+    osu.CreateEmotes(DisCl)
 })
 
 DisCl.on("message", async message => {

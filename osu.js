@@ -1,13 +1,16 @@
 const DiscordJS = require("discord.js")
 const Utils = require("./utils")
 const NodeOsu = require("node-osu")
+const ppcalc = require("./calculator")
+const moment = require("moment")
 const OsuApi = new NodeOsu.Api('d3bb61f11b973d6c2cdc0dd9ea7998c2a0b15c1e', {
     notFoundAsError: true,
     completeScores: false,
     parseNumeric: true
 })
+const Calculator = new ppcalc()
 const Mods = {
-    Bit = {
+    Bit : {
         None: 0,
         NoFail: 1 << 0,
         Easy: 1 << 1,
@@ -41,7 +44,7 @@ const Mods = {
         ScoreV2: 1 << 29,
         Mirror: 1 << 30
     },
-    BitArr = [
+    BitArr : [
         None = 0,
         NoFail = 1 << 0,
         Easy = 1 << 1,
@@ -74,7 +77,41 @@ const Mods = {
         Key2 = 1 << 28,
         ScoreV2 = 1 << 29,
         Mirror = 1 << 30
-    ]
+    ],
+    Names : [
+        None = "No Mod",
+        NoFail = "NF",
+        Easy = "EZ",
+        TouchDevice = "TD",
+        Hidden = "HD",
+        HardRock = "HR",
+        SuddenDeath = "SD",
+        DoubleTime = "DT",
+        Relax = "RX",
+        HalfTime = "HT",
+        Nightcore = "NC",
+        Flashlight = "FL",
+        Autoplay = "AU",
+        SpunOut = "SO",
+        Relax2 = "AP",
+        Perfect = "PF",
+        Key4 = "4K",
+        Key5 = "5K",
+        Key6 = "6K",
+        Key7 = "7K",
+        Key8 = "8K",
+        FadeIn = "FI",
+        Random = "RD",
+        Cinema = "CN",
+        Target = "TP",
+        Key9 = "9K",
+        KeyCoop = "2P",
+        Key1 = "1K",
+        Key3 = "3K",
+        Key2 = "2K",
+        ScoreV2 = "V2",
+        Mirror = "MR"
+    ],
 }
 const Commands = {
     Profile : ["mania", "ctb", "taiko", "osu"],
@@ -94,7 +131,7 @@ const Gamemodes = {
     "mania" : 3,
     "maniatop" : 3
 }
-const Mods = {
+const Mod = {
     Name : ["Standard", "Taiko", "Catch the Beat!", "Mania"],
     Link : ["osu", "taiko", "fruits", "mania"]
 }
@@ -105,6 +142,51 @@ function print(text) {
 
 function RemoveNonDiffMods(mods) {
     return (mods & Mods.Bit.DoubleTime | mods & Mods.Bit.HalfTime | mods & Mods.Bit.HardRock | mods & Mods.Bit.Easy)
+}
+
+function CalculateAcc(counts) {
+    return (counts[50] * 50 + counts[100] * 100 + counts[300] * 300) / (counts[50] * 300 + counts[100] * 300 + counts[300] * 300 + counts.miss * 300)
+}
+
+function GetModsFromRaw(rawMods) {
+    if (rawMods === 0) return "No Mod"
+    // noinspection 
+    let resultMods = ""
+    // noinspection JSBitwiseOperatorUsage
+    if (rawMods & BitMods.Perfect) rawMods &= ~BitMods.SuddenDeath
+    // noinspection JSBitwiseOperatorUsage
+    if (rawMods & BitMods.Nightcore) rawMods &= ~BitMods.DoubleTime
+    for (let i = 0; i < BitModsArr.length; i++) {
+        const mod = BitModsArr[i]
+        // noinspection JSBitwiseOperatorUsage
+        if (mod & rawMods)
+            resultMods += Mods.Names[i]
+    }
+    return resultMods
+}
+
+function DateDiff(playDate, now) {
+    // noinspection JSUnresolvedVariable,JSUnresolvedVariable,JSUnresolvedVariable,JSUnresolvedVariable,JSUnresolvedVariable,JSUnresolvedVariable
+    let
+        diffAr = [],
+
+        //Get Date Differences
+        diffObj = moment.duration(now.diff(playDate)),
+        yearDiff = diffObj._data.years,
+        monthDiff = diffObj._data.months,
+        dayDiff = diffObj._data.days,
+        hourDiff = diffObj._data.hours,
+        minuteDiff = diffObj._data.minutes,
+        secondDiff = diffObj._data.seconds
+
+    //Fill diffAr if difference > 0
+    if (yearDiff > 0) yearDiffFin = diffAr[diffAr.length] = yearDiff + ' Years '
+    if (monthDiff > 0) diffAr[diffAr.length] = monthDiff + ' Months '
+    if (dayDiff > 0) diffAr[diffAr.length] = dayDiff + ' Days '
+    if (hourDiff > 0) diffAr[diffAr.length] = hourDiff + ' Hours '
+    if (minuteDiff > 0) diffAr[diffAr.length] = minuteDiff + ' Minutes '
+    if (secondDiff > 0) diffAr[diffAr.length] = secondDiff + ' Seconds '
+    return diffAr[1] === undefined ? diffAr[0] : diffAr[0] + diffAr[1]
 }
 
 /**
@@ -162,7 +244,7 @@ async function Command(cmd, args) {
     args = ParseArgs(args, cmd)
     for (k in Commands) 
         if (Commands[k].indexOf(cmd) !== -1) 
-            try { return await eval(`${k}(${JSON.stringify(args)})`) } catch (err) { return HandleError(err, JSON.parse(args)) }
+            try { return await eval(`${k}(${JSON.stringify(args)})`) } catch (err) { return HandleError(err, args) }
 }
 
 /**
@@ -203,29 +285,40 @@ async function Profile(args) {
 async function Recent(args) {
     if (args.Flags.g && args.Flags.b) return await RecentBestAbove(args)
     if (args.Flags.b) return await RecentBest(args)
-    let profile = await OsuApi.getUser({u: user, m: mode})
+    let profile = await OsuApi.getUser({u: args.Name, m: args.Flags.m})
     let recent
-    try { recent = await OsuApi.getUserRecent({u: user, m: mode, limit: 50}) } catch(e) { return `**🔴 ${profile.name} has no recent plays.**` }
+    try { recent = await OsuApi.getUserRecent({u: args.Name, m: args.Flags.m, limit: 50}) } catch(e) { return `**🔴 ${profile.name} has no recent plays.**` }
     
-    let mostRecent = recentList[0]
+    let mostRecent = recent[0]
 
     beatmap = (await OsuApi.getBeatmaps({
         "b": mostRecent.beatmapId,
         "mods": RemoveNonDiffMods(mostRecent.raw_mods),
         "a": 1,
-        "m": mode
+        "m": args.Flags.m
     }))[0]
 
     let tries = 0
-    for (let i = 0; i < recentList.length; i++) {
-        if (recentList[i].beatmapId === recent.beatmapId) tries++
+    for (let i = 0; i < recent.length; i++) {
+        if (recent[i].beatmapId === mostRecent.beatmapId) tries++
         else break
     }
 
     let fcppDisplay = ""
-    //if (recent.maxCombo < beatmap.maxCombo - 15 || recent.counts.miss > 0) fcppDisplay = `(${TwoDigitValue(await Calculator.GetFcPP(recent))}pp for ${TwoDigitValue(Calculator.GetFcAcc(recent) * 100)}% FC) `
-    description = `▸ ${await this.Client.emojis.resolve(GetRankingEmote(recent.rank))} ▸ **${TwoDigitValue(await Calculator.GetPlayPP(recent))}pp** ${fcppDisplay}▸ ${TwoDigitValue(CalculateAcc(recent.counts) * 100)}%\n`
-    description += `▸ ${recent.score} ▸ x${recent.maxCombo}/${beatmap.maxCombo} ▸ [${recent.counts[300]}/${recent.counts[100]}/${recent.counts[50]}/${recent.counts.miss}]`
+    if (mostRecent.maxCombo < beatmap.maxCombo - 15 || mostRecent.counts.miss > 0) fcppDisplay = `(${Utils.ToFixedRound(await Calculator.GetFcPP(mostRecent), 2)}pp for ${Utils.ToFixedRound(Calculator.GetFcAcc(mostRecent) * 100, 2)}% FC) `
+    description = `▸ ${Utils.GetEmoji(mostRecent.rank)} ▸ **${Utils.ToFixedRound(await Calculator.GetPlayPP(mostRecent), 2)}pp** ${fcppDisplay}▸ ${Utils.ToFixedRound(CalculateAcc(mostRecent.counts) * 100, 2)}%\n`
+    description += `▸ ${mostRecent.score} ▸ x${mostRecent.maxCombo}/${beatmap.maxCombo} ▸ [${mostRecent.counts[300]}/${mostRecent.counts[100]}/${mostRecent.counts[50]}/${mostRecent.counts.miss}]`
+
+    if (beatmap.objects.normal + beatmap.objects.slider + beatmap.objects.spinner !== mostRecent.counts[300] + mostRecent.counts[100] + mostRecent.counts[50] + mostRecent.counts.miss)
+            description += `\n▸ **Map Completion:** ${Utils.ToFixedRound((mostRecent.counts[300] + mostRecent.counts[100] + mostRecent.counts[50] + mostRecent.counts.miss) / (beatmap.objects.normal + beatmap.objects.slider + beatmap.objects.spinner) * 100, 2)}%`
+
+
+    return new 
+    DiscordJS.MessageEmbed()
+        .setAuthor(`${beatmap.title} [${beatmap.version}] +${GetModsFromRaw(mostRecent.raw_mods)} [${Utils.ToFixedRound(beatmap.difficulty.rating, 2)}★]`, `http://s.ppy.sh/a/${profile.id}?hjdjkf=${new Date().getHours()}`, `https://osu.ppy.sh/b/${beatmap.id}`)
+        .setThumbnail(`https://b.ppy.sh/thumb/${beatmap.beatmapSetId}l.jpg`)
+        .setDescription(description)
+        .setFooter(`Try #${tries} | ${DateDiff(new moment(mostRecent.date), new moment(Date.now()))}Ago On osu! Official Server`)
 
 }
 
@@ -296,4 +389,4 @@ function Track(args) {
     
 }
 
-module.exports = {Command}
+module.exports = {Command, CreateEmotes : Utils.CreateEmotes}
