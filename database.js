@@ -4,6 +4,8 @@ let data = {
     users: {
         "290850421487042560" : {osu_username : "Trollface"},
         "141916381493854208" : {osu_username : "Karo"},
+        "408278780453453824" : {osu_username : "Deafilamor"},
+        "457985145899712512" : {osu_username : "Endzeee"},
     },
     servers: [],
     tracked: [],
