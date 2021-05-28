@@ -1,7 +1,10 @@
 const
     sql = require("mssql")
 let data = {
-    users: [],
+    users: {
+        "290850421487042560" : {osu_username : "Trollface"},
+        "141916381493854208" : {osu_username : "Karo"},
+    },
     servers: [],
     tracked: [],
     trackedUsers: []
@@ -10,11 +13,12 @@ let loaded = false;
 
 class Database {
     constructor() {
-        SelectData()
-        setInterval(UpdateData, 600000)
+        //SelectData()
+        //setInterval(UpdateData, 600000)
     }
 
     CheckIfNew(discordId, discordName, serverId, serverName) {
+        return
         if (loaded) {
             if (!data.users[discordId])  // noinspection JSIgnoredPromiseFromCall
                 InsertUsersData(discordId, discordName)
@@ -31,6 +35,7 @@ class Database {
     }
 
     NewMessage(userId, userName, serverId, serverName) {
+        return
         data.users[userId].messages++
         data.users[userId].changed = true
         if (data.users[userId].discord_name !== userName) data.users[userId].discord_name = userName
@@ -41,11 +46,12 @@ class Database {
     }
 
     async SetOsuUsername(discordId, username) {
+        return
         await SetOsuUsername(discordId, username)
     }
 
     GetOsuName(discordId) {
-        return data.users[discordId].osu_username || "Not Found"
+        return data.users[discordId]?.osu_username || "Not Found"
     }
 
     /**
@@ -72,6 +78,7 @@ class Database {
 module.exports = Database
 
 async function InsertUsersData(id, name) {
+    return
     await Connect()
     try {
         await sql.query`
@@ -86,6 +93,7 @@ async function InsertUsersData(id, name) {
     await SelectData()
 }
 async function InsertServersData(id, name) {
+    return
     await Connect()
     try {
         await sql.query`
@@ -101,6 +109,7 @@ async function InsertServersData(id, name) {
 }
 
 async function UpdateData() {
+    return
     await Connect()
     for (let index in data.users) {
         // noinspection JSUnfilteredForInLoop
@@ -125,6 +134,7 @@ async function UpdateData() {
 }
 
 async function SelectData() {
+    return
     await Connect()
 
     await SelectUsers()
@@ -135,6 +145,7 @@ async function SelectData() {
     loaded = true
 }
 async function SelectUsers() {
+    return
     await Connect()
     let result = (await sql.query`SELECT *
                                   FROM users;`).recordset;
@@ -145,6 +156,7 @@ async function SelectUsers() {
     })
 }
 async function SelectServers() {
+    return
     await Connect()
     result = (await sql.query`SELECT *
                              FROM servers;`).recordset
@@ -155,6 +167,7 @@ async function SelectServers() {
     })
 }
 async function SelectTracking() {
+    return
     await Connect()
     data.tracked = []
     result = (await sql.query`SELECT *
@@ -168,6 +181,7 @@ async function SelectTracking() {
     })
 }
 async function SelectTrackedUsers() {
+    return
     await Connect()
     data.trackedUsers = []
     result = (await sql.query`SELECT * FROM tracked_users`).recordset
@@ -180,6 +194,7 @@ async function SelectTrackedUsers() {
 }
 
 async function SetOsuUsername(discordId, username) {
+    return
     await Connect()
     await sql.query`UPDATE users 
                         SET osu_username=${username} 
@@ -188,6 +203,7 @@ async function SetOsuUsername(discordId, username) {
 }
 
 async function AddTracking(userId, channelId, serverId, osuName, mode, limit, pp, playPp, playMap, playScore, rank, countryRank) {
+    return
     await Connect()
     let result = await sql.query`EXEC AddUserToTracking 
                                     @user_id      = ${userId}, 
@@ -205,6 +221,7 @@ async function AddTracking(userId, channelId, serverId, osuName, mode, limit, pp
     data.tracked[result.id_trc] = result
 }
 async function UpdateTrack(id, pp, rank, countryRank, playPp, playMap, playScore) {
+    return
     sql.query`EXEC update_tracked 
                             @pp             = ${pp},
                             @rank           = ${rank},
@@ -217,5 +234,6 @@ async function UpdateTrack(id, pp, rank, countryRank, playPp, playMap, playScore
 }
 
 async function Connect() {
+    return
     await sql.connect("mssql://Cheeseadmin:Trollface7272@cheeseserver.database.windows.net:1433/cheesegaming?encrypt=true")
 }
