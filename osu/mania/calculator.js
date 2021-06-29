@@ -1,54 +1,60 @@
-const
-    ojsama = require("ojsama"),
-    request = require("request"),
-    fs = require("fs"),
-    BitMods = {
-        None: 0,
-        NoFail: 1 << 0,
-        Easy: 1 << 1,
-        TouchDevice: 1 << 2,
-        Hidden: 1 << 3,
-        HardRock: 1 << 4,
-        SuddenDeath: 1 << 5,
-        DoubleTime: 1 << 6,
-        Relax: 1 << 7,
-        HalfTime: 1 << 8,
-        Nightcore: 1 << 9, // Only set along with DoubleTime. i.e: NC only gives 576
-        Flashlight: 1 << 10,
-        Autoplay: 1 << 11,
-        SpunOut: 1 << 12,
-        Relax2: 1 << 13,    // Autopilot
-        Perfect: 1 << 14, // Only set along with SuddenDeath. i.e: PF only gives 16416
-        Key4: 1 << 15,
-        Key5: 1 << 16,
-        Key6: 1 << 17,
-        Key7: 1 << 18,
-        Key8: 1 << 19,
-        FadeIn: 1 << 20,
-        Random: 1 << 21,
-        Cinema: 1 << 22,
-        Target: 1 << 23,
-        Key9: 1 << 24,
-        KeyCoop: 1 << 25,
-        Key1: 1 << 26,
-        Key3: 1 << 27,
-        Key2: 1 << 28,
-        ScoreV2: 1 << 29,
-        Mirror: 1 << 30
-    },
-    OD0_MS = 80,
-    OD10_MS = 20,
-    AR0_MS = 1800,
-    AR5_MS = 1200,
-    AR10_MS = 450,
-    OD_MS_STEP = (OD0_MS - OD10_MS) / 10.0,
-    AR_MS_STEP1 = (AR0_MS - AR5_MS) / 5.0,
-    AR_MS_STEP2 = (AR5_MS - AR10_MS) / 5.0
+const ojsama = require("ojsama")
+const request = require("request")
+const fs = require("fs")
+const print = console.log
+const BitMods = {
+    None: 0,
+    NoFail: 1 << 0,
+    Easy: 1 << 1,
+    TouchDevice: 1 << 2,
+    Hidden: 1 << 3,
+    HardRock: 1 << 4,
+    SuddenDeath: 1 << 5,
+    DoubleTime: 1 << 6,
+    Relax: 1 << 7,
+    HalfTime: 1 << 8,
+    Nightcore: 1 << 9, // Only set along with DoubleTime. i.e: NC only gives 576
+    Flashlight: 1 << 10,
+    Autoplay: 1 << 11,
+    SpunOut: 1 << 12,
+    Relax2: 1 << 13,    // Autopilot
+    Perfect: 1 << 14, // Only set along with SuddenDeath. i.e: PF only gives 16416
+    Key4: 1 << 15,
+    Key5: 1 << 16,
+    Key6: 1 << 17,
+    Key7: 1 << 18,
+    Key8: 1 << 19,
+    FadeIn: 1 << 20,
+    Random: 1 << 21,
+    Cinema: 1 << 22,
+    Target: 1 << 23,
+    Key9: 1 << 24,
+    KeyCoop: 1 << 25,
+    Key1: 1 << 26,
+    Key3: 1 << 27,
+    Key2: 1 << 28,
+    ScoreV2: 1 << 29,
+    Mirror: 1 << 30
+}
+const OD0_MS = 80
+const OD10_MS = 20
+const AR0_MS = 1800
+const AR5_MS = 1200
+const AR10_MS = 450
+const OD_MS_STEP = (OD0_MS - OD10_MS) / 10.0
+const AR_MS_STEP1 = (AR0_MS - AR5_MS) / 5.0
+const AR_MS_STEP2 = (AR5_MS - AR10_MS) / 5.0
+const basePath = "./cache/maps/0/"
 
 class ppCalculator {
     constructor() {
-        if (!fs.existsSync("./cache")){
-            fs.mkdirSync("./cache");
+        let path = "."
+        let split = basePath.split("/")
+        for (let i = 1; i < split.length; i++) {
+            const el = split[i]
+            if (!fs.existsSync(path + "/" + el))
+            fs.mkdirSync(path + "/" + el)
+            path += "/" + el
         }
     }
     async GetFcPP(play) {
@@ -85,7 +91,7 @@ module.exports = ppCalculator
 
 async function StarWithMods(map, mods) {
     return new Promise((resolve) => {
-        fs.readFile('./cache/' + map + ".osu", 'utf8', async function (err, data) {
+        fs.readFile(basePath + map + ".osu", 'utf8', async function (err, data) {
             if (err) {
                 data = await GetBeatmapOsuFile(map)
             }
@@ -97,7 +103,7 @@ async function StarWithMods(map, mods) {
 
 async function SpecificAccPP(map, acc, mods) {
     return new Promise((resolve) => {
-        fs.readFile('./cache/' + map.id + ".osu", 'utf8', async function (err, data) {
+        fs.readFile(basePath + map.id + ".osu", 'utf8', async function (err, data) {
             if (err) {
                 data = await GetBeatmapOsuFile(map.id)
             }
@@ -108,7 +114,7 @@ async function SpecificAccPP(map, acc, mods) {
 
 async function PPCalc(play, fc) {
     return new Promise((resolve) => {
-        fs.readFile('./cache/' + play.beatmapId + ".osu", 'utf8', async function (err, data) {
+        fs.readFile(basePath + play.beatmapId + ".osu", 'utf8', async function (err, data) {
             if (err) {
                 data = await GetBeatmapOsuFile(play.beatmapId)
             }
@@ -121,7 +127,7 @@ async function PPCalc(play, fc) {
 async function GetBeatmapOsuFile(id) {
     return new Promise((resolve) => {
         request("http://osu.ppy.sh/osu/" + id, function (err, res, body) {
-            fs.writeFile("./cache/" + id + ".osu", body, (err) => {
+            fs.writeFile(basePath + id + ".osu", body, (err) => {
                 if (err) console.log(err)
             })
             resolve(body)
@@ -173,18 +179,17 @@ function GetPlayAcc(counts) {
 
 function GetDiffRating(difficulty, mods) {
     let speed = 1, multiplier = 1
-    // noinspection JSBitwiseOperatorUsage
+
     if (mods & BitMods.DoubleTime) speed = 1.5
-    else { // noinspection JSBitwiseOperatorUsage
+    else {
         if (mods & BitMods.HalfTime) speed = 0.75
     }
 
-    // noinspection JSBitwiseOperatorUsage
     if (mods & BitMods.HardRock) {
         multiplier = 1.4
         difficulty.size *= 1.3
         difficulty.size = Math.min(10, difficulty.size)
-    } else { // noinspection JSBitwiseOperatorUsage
+    } else {
         if (mods & BitMods.Easy) {
             multiplier = 0.5
             difficulty.size *= 1.3

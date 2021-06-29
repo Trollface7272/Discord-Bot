@@ -1,6 +1,8 @@
 const DiscordJS = require("discord.js")
 const DisCl = new DiscordJS.Client()
-const osu = require("./osu")
+const osu = require("./osu/osu")
+const database = require("./database").instance
+const emotes = require("./emotes")
 const Commands = {
     osu : [
         "mania", "ctb", "taiko", "osu",
@@ -39,11 +41,12 @@ function CheckIfIsCommand(text) {
 
 DisCl.on("ready", () => {
     print(`Logged in as ${DisCl.user.tag}`)
-    osu.CreateEmotes(DisCl)
+    emotes.instance.CreateEmotes(DisCl)
 })
 
 DisCl.on("message", async message => {
     if (message.author.bot) return
+    database.UserMessage(message)
     let prefix = "."
     let content = message.content.toLowerCase()
     let args = content.split(" ")
@@ -56,13 +59,26 @@ DisCl.on("message", async message => {
 
     if (!commandType) return
 
-    let embed = await CommandHandles[commandType](command, args)
+    let data = await CommandHandles[commandType](command, args, message), embed
+    if (Array.isArray(data)) {
+        data[1](message)
+        embed = data[0]
+    } else embed = data
+    if (!embed || embed == "") embed = "Error"
     message.channel.send(embed)
+});
+
+
+
+([`exit`, `SIGINT`, `SIGUSR1`, `SIGUSR2`, `uncaughtException`, `SIGTERM`]).forEach(eventType => {
+    process.on(eventType, exitHandler.bind(null, eventType));
 })
 
-
-
-
+async function exitHandler(options, exitCode) {
+    await database.SaveData()
+    if (exitCode || exitCode === 0) console.log(exitCode)
+    process.exit()
+}
 
 
 
