@@ -53,7 +53,7 @@ async function Normal(args) {
 
         description += 
 `**${score.index}. [${map.title} [${map.version}]](${utils.GetMapLink(map.id)}) +${utils.ModsFromRaw(score.raw_mods)}** [${utils.RoundFixed(await calculator.GetStarsWithMods(map.id, score.raw_mods))}★]
-▸ ${emotes.GetEmote(score.rank)} ▸ **${utils.RoundFixed(score.pp)}pp** ${fcppDisplay}▸ ${utils.RoundFixed(utils.GetAccuracy(score.counts, args.Flags.m) * 100)}%
+▸ ${emotes.GetEmote(score.rank)} ▸ **${utils.RoundFixed(score.pp)}pp** ${fcppDisplay}▸ ${utils.RoundFixed(utils.GetAccuracy(score.counts, args.Flags.m))}%
 ▸ ${utils.CommaFormat(score.score)} ▸ x${score.maxCombo}/${map.maxCombo} ▸ [${score.counts[300]}/${score.counts[100]}/${score.counts[50]}/${score.counts.miss}]
 ▸ Score Set ${utils.DateDiff(new moment(score.date), new moment(Date.now()))}Ago\n`
     }
@@ -95,7 +95,7 @@ async function Specific(args) {
 
         description += 
 `**${score.index}. [${map.title} [${map.version}]](${utils.GetMapLink(map.id)}) +${utils.ModsFromRaw(score.raw_mods)}** [${utils.RoundFixed(await calculator.GetStarsWithMods(map.id, score.raw_mods))}★]
-▸ ${emotes.GetEmote(score.rank)} ▸ **${utils.RoundFixed(score.pp)}pp** ${fcppDisplay}▸ ${utils.RoundFixed(utils.CalculateAcc(score.counts) * 100)}%
+▸ ${emotes.GetEmote(score.rank)} ▸ **${utils.RoundFixed(score.pp)}pp** ${fcppDisplay}▸ ${utils.RoundFixed(utils.CalculateAcc(score.counts))}%
 ▸ ${utils.CommaFormat(score.score)} ▸ x${score.maxCombo}/${map.maxCombo} ▸ [${score.counts[300]}/${score.counts[100]}/${score.counts[50]}/${score.counts.miss}]
 ▸ Score Set ${utils.DateDiff(new moment(score.date), new moment(Date.now()))}Ago\n`
     }
@@ -132,7 +132,7 @@ async function Recent(args) {
 
         description += 
 `**${score.index}. [${map.title} [${map.version}]](${utils.GetMapLink(map.id)}) +${utils.ModsFromRaw(score.raw_mods)}** [${utils.RoundFixed(await calculator.GetStarsWithMods(map.id, score.raw_mods))}★]
-▸ ${emotes.GetEmote(score.rank)} ▸ **${utils.RoundFixed(score.pp)}pp** ${fcppDisplay}▸ ${utils.RoundFixed(utils.CalculateAcc(score.counts) * 100)}%
+▸ ${emotes.GetEmote(score.rank)} ▸ **${utils.RoundFixed(score.pp)}pp** ${fcppDisplay}▸ ${utils.RoundFixed(utils.CalculateAcc(score.counts))}%
 ▸ ${utils.CommaFormat(score.score)} ▸ x${score.maxCombo}/${map.maxCombo} ▸ [${score.counts[300]}/${score.counts[100]}/${score.counts[50]}/${score.counts.miss}]
 ▸ Score Set ${utils.DateDiff(new moment(score.date), new moment(Date.now()))}Ago\n`
     }
@@ -175,7 +175,7 @@ async function RecentSpecific(args) {
 
         description += 
 `**${score.index}. [${map.title} [${map.version}]](${utils.GetMapLink(map.id)}) +${utils.ModsFromRaw(score.raw_mods)}** [${utils.RoundFixed(await calculator.GetStarsWithMods(map.id, score.raw_mods))}★]
-▸ ${emotes.GetEmote(score.rank)} ▸ **${utils.RoundFixed(score.pp)}pp** ${fcppDisplay}▸ ${utils.RoundFixed(utils.CalculateAcc(score.counts) * 100)}%
+▸ ${emotes.GetEmote(score.rank)} ▸ **${utils.RoundFixed(score.pp)}pp** ${fcppDisplay}▸ ${utils.RoundFixed(utils.CalculateAcc(score.counts))}%
 ▸ ${utils.CommaFormat(score.score)} ▸ x${score.maxCombo}/${map.maxCombo} ▸ [${score.counts[300]}/${score.counts[100]}/${score.counts[50]}/${score.counts.miss}]
 ▸ Score Set ${utils.DateDiff(new moment(score.date), new moment(Date.now()))}Ago\n`
     }
@@ -229,7 +229,7 @@ async function RecentGreaterThen(args) {
 
         description += 
 `**${score.index}. [${map.title} [${map.version}]](${utils.GetMapLink(map.id)}) +${utils.ModsFromRaw(score.raw_mods)}** [${utils.RoundFixed(await calculator.GetStarsWithMods(map.id, score.raw_mods))}★]
-▸ ${emotes.GetEmote(score.rank)} ▸ **${utils.RoundFixed(score.pp)}pp** ${fcppDisplay}▸ ${utils.RoundFixed(utils.CalculateAcc(score.counts) * 100)}%
+▸ ${emotes.GetEmote(score.rank)} ▸ **${utils.RoundFixed(score.pp)}pp** ${fcppDisplay}▸ ${utils.RoundFixed(utils.CalculateAcc(score.counts))}%
 ▸ ${utils.CommaFormat(score.score)} ▸ x${score.maxCombo}/${map.maxCombo} ▸ [${score.counts[300]}/${score.counts[100]}/${score.counts[50]}/${score.counts.miss}]
 ▸ Score Set ${utils.DateDiff(new moment(score.date), new moment(Date.now()))}Ago\n`
     }
