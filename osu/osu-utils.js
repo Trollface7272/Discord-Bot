@@ -521,6 +521,10 @@ function GetAccuracy(counts, mode) {
     return acc
 }
 
+function CalculateAcc(counts) {
+    return StdAccuracy(counts)
+}
+
 function GetProgress(objects, counts, mode) {
     return utils.RoundFixed((counts[300] + counts[100] + counts[50] + counts.miss) / (objects.normal + objects.slider + objects.spinner) * 100)
 }
@@ -530,4 +534,4 @@ function GetHitsDisplay(counts, mode) {
 }
 
 
-module.exports = {ModNames, Mods, ParseArgs, GetProfile, RoundFixed, CommaFormat, GetFlagUrl, GetProfileLink, GetServer, GetProfileImage, GetRecent, GetMap, GetProfileFromCache, RemoveNonDiffMods, ModsFromRaw, GetMapLink, GetMapImage, DateDiff, IndexScores, GetTopScores, SortByDate, Round, FilterByPP, FillZeros, GetScores, CtbAccuracy, GetCombo, GetAccuracy, GetHitsDisplay, GetProgress}
+module.exports = {CalculateAcc, ModNames, Mods, ParseArgs, GetProfile, RoundFixed, CommaFormat, GetFlagUrl, GetProfileLink, GetServer, GetProfileImage, GetRecent, GetMap, GetProfileFromCache, RemoveNonDiffMods, ModsFromRaw, GetMapLink, GetMapImage, DateDiff, IndexScores, GetTopScores, SortByDate, Round, FilterByPP, FillZeros, GetScores, CtbAccuracy, GetCombo, GetAccuracy, GetHitsDisplay, GetProgress}
