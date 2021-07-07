@@ -147,7 +147,8 @@ const Mods = {
 const print = console.log
 const NodeOsu = require("node-osu")
 const moment = require("moment")
-const database = require("../database").instance
+const globals = require("../globals").instance
+const database = globals.database
 const Api = new NodeOsu.Api('d3bb61f11b973d6c2cdc0dd9ea7998c2a0b15c1e', {
     notFoundAsError: true,
     completeScores: false,
