@@ -109,7 +109,7 @@ Client.ws.on('INTERACTION_CREATE', async interaction => {
 Client.on("message", async message => {
     if (message.author.bot) return
     globals.database.UserMessage(message)
-    let prefix = ":"
+    let prefix = "."
     let content = message.content.toLowerCase()
     let args = content.split(" ")
     let command = args.shift()
