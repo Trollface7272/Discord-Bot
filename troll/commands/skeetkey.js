@@ -1,5 +1,5 @@
 function Main() {
-    return `GIFT-${RandString(5)}-${RandString(5)}-${RandString(5)}`
+    return [`GIFT-${RandString(5)}-${RandString(5)}-${RandString(5)}`]
 }
 
 function RandString(len) {
