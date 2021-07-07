@@ -96,7 +96,7 @@ async function StarWithMods(map, mods) {
                 data = await GetBeatmapOsuFile(map)
             }
             const parser = new ojsama.parser().feed(data);
-            resolve(new ojsama.diff().calc({map: parser.map, mods: mods}).total)
+            try {resolve(new ojsama.diff().calc({map: parser.map, mods: mods}).total)} catch(err) {resolve(0)}
         })
     })
 }
