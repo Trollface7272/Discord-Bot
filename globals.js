@@ -1,6 +1,6 @@
 const database = require("./database")
 const print = console.log
-const DEV = true
+const DEV = false
 const DEV_SERVER_ID = "341153679992160266"
 var client
 
