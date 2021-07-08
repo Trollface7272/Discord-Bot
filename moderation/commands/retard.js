@@ -21,7 +21,7 @@ const MANAGE_ROLES = 1 << 28
 async function AddRoles(roles, args) {
     if (!args.user.raw_member.hasPermission("MANAGE_ROLES")) return { username: member.user.username, role: roles[j].name, code: 2 }
     let member = args.mentions[0]
-    if (!member) return { username: member.user.username, role: roles[j].name, code: 3 }
+    if (!member) return { role: roles[j].name, code: 3 }
     for (let j = 0; j < roles.length; j++) {
         const role = roles[j]
         if (member.roles.cache.find(r => r.name == role.name)) {
