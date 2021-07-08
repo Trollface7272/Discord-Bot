@@ -19,8 +19,9 @@ const MANAGE_ROLES = 1 << 28
  * @returns 
  */
 async function AddRoles(roles, args) {
-    if (!args.user.raw_member.hasPermission(MANAGE_ROLES)) return
+    if (!args.user.raw_member.hasPermission("MANAGE_ROLES")) return { username: member.user.username, role: roles[j].name, code: 2 }
     let member = args.mentions[0]
+    if (!member) return { username: member.user.username, role: roles[j].name, code: 3 }
     for (let j = 0; j < roles.length; j++) {
         const role = roles[j]
         if (member.roles.cache.find(r => r.name == role.name)) {
@@ -88,6 +89,7 @@ function ParseResponse(response) {
         case 0: return `Successfully set **${response.username}'s** role to \`${response.role}\`.`
         case 1: return `**${response.username}** already has the highest role.`
         case 2: return `Can't change roles of **${response.username}** - Not enough permissions.`
+        case 3: return `No user mentioned.`
         case 999: return `Unhandled error - ${response.message}`
         default: return `Unknown error formatting response.`
     }
