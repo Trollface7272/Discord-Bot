@@ -45,9 +45,9 @@ async function Recent(args) {
  * @param {Command} args 
  */
 async function Top(args) {
-    if (args.Flags.g && args.Flags.b) return await Handles.Top.RecentGreaterThen(args)
+    if (args.Flags.g && args.Flags.b) return await Handles.Top.RecentGreaterThan(args)
     if (args.Flags.p && args.Flags.b) return await Handles.Top.RecentSpecific(args)
-    if (args.Flags.g) return await Handles.Top.GreaterThen(args)
+    if (args.Flags.g) return await Handles.Top.GreaterThan(args)
     if (args.Flags.b) return await Handles.Top.Recent(args)
     if (args.Flags.p) return await Handles.Top.Specific(args)
     return await Handles.Top.Normal(args)

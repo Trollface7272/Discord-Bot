@@ -14,6 +14,7 @@ const discord = require("discord.js")
  * 
  * @typedef {Object} User
  * @property {String} id
+ * @property {discord.GuildMember} raw_member
  * 
  * @typedef {Array<discord.Role>} RoleArray
  * 
@@ -37,7 +38,8 @@ function ParseEverything(msg, args) {
         id: msg.guild.id
     }
     out.user = {
-        id: msg.author.id
+        id: msg.author.id,
+        raw_member: msg.member
     }
     out.mentions = []
     let mentions = msg.mentions.members.array()

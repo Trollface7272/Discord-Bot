@@ -454,8 +454,8 @@ function SortByDate(arr, way) {
  * @param {Number} min 
  * @returns {Array}
  */
-function FilterByPP(arr, min) {
-    return arr.filter(item => item.pp >= min)
+function FilterByPP(arr, min, lower) {
+    return arr.filter(item => lower ? (item.pp <= min) : (item.pp >= min))
 }
 
 /**
@@ -526,7 +526,7 @@ function CalculateAcc(counts) {
 }
 
 function GetProgress(objects, counts, mode) {
-    return utils.RoundFixed((counts[300] + counts[100] + counts[50] + counts.miss) / (objects.normal + objects.slider + objects.spinner) * 100)
+    return RoundFixed((counts[300] + counts[100] + counts[50] + counts.miss) / (objects.normal + objects.slider + objects.spinner) * 100)
 }
 
 function GetHitsDisplay(counts, mode) {

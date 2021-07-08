@@ -122,7 +122,7 @@ Client.on("message", async message => {
     if (!commandType) return
 
     let data, embed
-    try {data = await CommandHandles[commandType](command, args, message)} catch(err) {data = "Unhandled error " + err.message}
+    try {data = await CommandHandles[commandType](command, args, message)} catch(err) {print(err);data = "Unhandled error " + err.message}
     if (Array.isArray(data)) {
         for (let i = 0; i < data.length; i++) {
             const el = data[i];
