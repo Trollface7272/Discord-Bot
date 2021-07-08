@@ -19,7 +19,7 @@ const MANAGE_ROLES = 1 << 28
  * @returns 
  */
 async function AddRoles(roles, args) {
-    if (!args.user.raw_member.hasPermission("MANAGE_ROLES")) return { username: member.user.username, role: roles[j].name, code: 2 }
+    if (!args.user.raw_member.hasPermission("MANAGE_ROLES")) return { username: args.user.raw_member.user.username, code: 2 }
     let member = args.mentions[0]
     if (!member) return { code: 3 }
     for (let j = 0; j < roles.length; j++) {
