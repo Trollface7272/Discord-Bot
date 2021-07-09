@@ -79,7 +79,7 @@ async function GetRetardRoles(serverId) {
     let o = [
         roles.find(r => r.name === "Retard"),
         roles.find(r => r.name === "Troglodyte"),
-        roles.find(r => r.name === "Ameba"),
+        roles.find(r => r.name === "Amoeba"),
         roles.find(r => r.name === "Braindead"),
     ]
     RetardRolesCache[serverId] = o
