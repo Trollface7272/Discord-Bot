@@ -13,7 +13,7 @@ const fs = require("fs");
 const print = console.log
 const BasePath = "./data/"
 const UserPath = BasePath + "users/"
-const CurrentVersion = 1
+const CurrentVersion = 1.1
 
 ;(function() {
     let path = "."
@@ -47,6 +47,10 @@ var users = {}
 
 function PortToNewVersion(user) {
     if (!user.version) user.version = 1
+    if (user.version < 1.1) {
+        user.version = 1.1
+        user.skeetkeyUses = 0
+    }
     return user
 }
 

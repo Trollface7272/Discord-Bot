@@ -1,7 +1,7 @@
 const database = require("./database")
 const print = console.log
-const DEV = false
-const DEV_SERVER_ID = "341153679992160266"
+const DEV = true
+const DEV_SERVER_ID = "854006362979827742"
 var client
 
 function AddSlashBase() {
