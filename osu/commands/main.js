@@ -13,7 +13,9 @@
 
 const utils = require("../osu-utils")
 const DiscordJS = require("discord.js")
-const database = require("../../database").instance
+const globals = require("../../globals").instance
+const database = globals.database
+console.log(database);
 const Handles = {
     Profile : require("./profile"),
     Recent  : require("./recent"),
