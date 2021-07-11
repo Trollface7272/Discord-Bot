@@ -34,7 +34,7 @@ async function Command(command, args, message) {
 
 async function SlashCommand(command, interaction) {
     let data = utils.ParseEverythingSlash(interaction)
-    return await SlashCommands[command]?.commandHandle(data, true)
+    return await SlashCommands[command]?.commandHandle(data, interaction)
 }
 
 async function AddSlashCommands() {

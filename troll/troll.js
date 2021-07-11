@@ -1,4 +1,5 @@
 const globals = require("../globals").instance
+const discord = require("discord.js")
 const CommandHandles = {
     skeetkey: require("./commands/skeetkey").Main
 }
@@ -21,7 +22,7 @@ async function Command(command, args, message) {
 
 async function SlashCommand(command, interaction) {
     let args = {}
-    return await SlashCommands[command]?.commandHandle()
+    return (await SlashCommands[command]?.commandHandle()) || ["Error"]
 }
 
 async function AddSlashCommands() {
@@ -29,6 +30,33 @@ async function AddSlashCommands() {
         let data = SlashCommands[k].data
         globals.AddSlashBase().commands.post({data})
     }
+}
+
+/**
+ * 
+ * @param {discord.Message} message 
+ */
+function ParseMessage(message) {
+    let out = {
+        user: {
+            id: message.author.id,
+            raw_user: message.author,
+            raw_member: message.member
+        }
+    }
+    return out
+}
+
+function ParseInteraction(interaction) {
+    print(interaction)
+    let out = {
+        user: {
+            id: message.author.id,
+            raw_user: message.author,
+            raw_member: message.member
+        }
+    }
+    return out
 }
 
 module.exports = {Command, AddSlashCommands, SlashCommand}

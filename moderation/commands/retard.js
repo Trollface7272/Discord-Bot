@@ -2,13 +2,14 @@ const utils = require("../moderation-utils")
 const globals = require("../../globals").instance
 const print = console.log
 const MANAGE_ROLES = 1 << 28
+const ADMINISTRATOR = 1 << 3
 
 /**
  * @param {utils.Args} args 
  */
  async function Main(args, slash=false) {
     let roles = await utils.GetRetardRoles(args.guild.id)
-    let resp = slash ? (await AddRolesSlash(roles, args.resolved, args.guild.id)) : (await AddRoles(roles, args))
+    let resp = slash ? (await AddRolesSlash(roles, args.resolved, args.guild.id, slash)) : (await AddRoles(roles, args))
     return [ParseResponse(resp)]
 }
 
@@ -49,8 +50,9 @@ async function AddRoles(roles, args) {
  * @param {String} guild 
  * @returns 
  */
-async function AddRolesSlash(roles, user, guild) {
+async function AddRolesSlash(roles, user, guild, interaction) {
     let member = await GetUser(user.id, guild)
+    if (!(interaction.member.permissions & MANAGE_ROLES || interaction.member.permissions & ADMINISTRATOR)) return { username: member.user.username, code: 2 }
     for (let j = 0; j < roles.length; j++) {
         const role = roles[j]
         if (user.roles.includes(role.id)) {
