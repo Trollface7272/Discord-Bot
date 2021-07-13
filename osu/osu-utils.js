@@ -291,7 +291,7 @@ async function GetScores(id, map, mode) {
     try {
         return await Api.getScores({b:map, m:mode, u: id})
     } catch (err) {
-        if (err == "Not found") return Errors.NoScores.replace("${Name}", id)
+        if (err.message == "Not found") return Errors.NoScores.replace("${Name}", id)
         print("Unhandled error")
         print(err.message)
         return Errors.UnknownError.replace("{Where}", "scores")
